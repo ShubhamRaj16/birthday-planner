@@ -218,7 +218,7 @@ function getAge(dobStr) {
 
 const EMPTY_FORM = {
   name: '',
-  dateOfBirth: '',
+  dob: '',
   interests: '',
   allergies: '',
   school: '',
@@ -241,7 +241,7 @@ function ChildForm({ initial = EMPTY_FORM, onSubmit, onCancel, loading, error, t
     e.preventDefault();
     const fd = new FormData();
     fd.append('name', form.name);
-    fd.append('dateOfBirth', form.dateOfBirth);
+    fd.append('dob', form.dob);
     fd.append('interests', form.interests);
     fd.append('allergies', form.allergies);
     fd.append('school', form.school);
@@ -267,12 +267,12 @@ function ChildForm({ initial = EMPTY_FORM, onSubmit, onCancel, loading, error, t
             />
           </FieldGroup>
           <FieldGroup>
-            <Label htmlFor="dateOfBirth">Date of Birth *</Label>
+            <Label htmlFor="dob">Date of Birth *</Label>
             <Input
-              id="dateOfBirth"
-              name="dateOfBirth"
+              id="dob"
+              name="dob"
               type="date"
-              value={form.dateOfBirth}
+              value={form.dob}
               onChange={handleChange}
               required
             />
@@ -389,8 +389,8 @@ export default function Children() {
           title={`Edit — ${editingChild.name}`}
           initial={{
             name: editingChild.name || '',
-            dateOfBirth: editingChild.dateOfBirth
-              ? editingChild.dateOfBirth.slice(0, 10)
+            dob: editingChild.dob
+              ? editingChild.dob.slice(0, 10)
               : '',
             interests: Array.isArray(editingChild.interests)
               ? editingChild.interests.join(', ')
@@ -418,7 +418,7 @@ export default function Children() {
 
       <Grid>
         {children.map((child) => {
-          const age = getAge(child.dateOfBirth);
+          const age = getAge(child.dob);
           const interests = Array.isArray(child.interests)
             ? child.interests
             : (child.interests || '').split(',').map((s) => s.trim()).filter(Boolean);
@@ -428,8 +428,8 @@ export default function Children() {
             <Card key={child.id}>
               <CardTop>
                 <Avatar>
-                  {child.avatarUrl ? (
-                    <img src={child.avatarUrl} alt={child.name} />
+                  {child.photo ? (
+                    <img src={`http://localhost:3001${child.photo}`} alt={child.name} />
                   ) : (
                     initial
                   )}

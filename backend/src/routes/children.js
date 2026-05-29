@@ -7,7 +7,8 @@ const svc = require('../services/childService');
 const avatarStorage = multer.diskStorage({
   destination: path.join(__dirname, '../../../uploads/avatars'),
   filename: (req, file, cb) => {
-    cb(null, `child-${req.params.id}-${Date.now()}${path.extname(file.originalname)}`);
+    const prefix = req.params.id || 'new';
+    cb(null, `child-${prefix}-${Date.now()}${path.extname(file.originalname)}`);
   },
 });
 const upload = multer({ storage: avatarStorage, limits: { fileSize: 10 * 1024 * 1024 } });
@@ -27,13 +28,14 @@ router.get('/:id', async (req, res, next) => {
   } catch (e) { next(e); }
 });
 
-router.post('/', async (req, res, next) => {
+router.post('/', upload.single('avatar'), async (req, res, next) => {
   try {
     const { name, dob } = req.body;
     if (!name || !dob) {
       return res.status(400).json({ data: null, error: { code: 'VALIDATION', message: 'name and dob are required' }, meta: {} });
     }
-    const data = await svc.createChild(req.body);
+    const photoPath = req.file ? `/uploads/avatars/${req.file.filename}` : undefined;
+    const data = await svc.createChild({ ...req.body, photo: photoPath });
     res.status(201).json({ data, error: null, meta: {} });
   } catch (e) { next(e); }
 });

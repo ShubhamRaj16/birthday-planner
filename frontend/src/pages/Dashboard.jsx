@@ -171,13 +171,13 @@ function getDaysUntilBirthday(dobStr) {
 }
 
 function ChildBirthdayCard({ child }) {
-  const days = getDaysUntilBirthday(child.dateOfBirth);
+  const days = getDaysUntilBirthday(child.dob);
   const initial = (child.name || '?')[0].toUpperCase();
 
   return (
     <Card>
       <Avatar>
-        {child.avatarUrl ? <img src={child.avatarUrl} alt={child.name} /> : initial}
+        {child.photo ? <img src={`http://localhost:3001${child.photo}`} alt={child.name} /> : initial}
       </Avatar>
       <CardInfo>
         <ChildName>{child.name}</ChildName>
