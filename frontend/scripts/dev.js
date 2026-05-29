@@ -34,7 +34,7 @@ serverCompiler.watch({ ignored: /node_modules/ }, (err) => {
 const devServer = new WebpackDevServer(
   {
     hot: true,
-    port: 3001,
+    port: 3002,
     devMiddleware: { writeToDisk: true },
     proxy: [
       {
@@ -57,11 +57,11 @@ const devServer = new WebpackDevServer(
 );
 
 devServer.start().then(() => {
-  console.log('Webpack Dev Server running on http://localhost:3001');
+  console.log('Webpack Dev Server running on http://localhost:3002');
   console.log('\nAvailable servers:');
-  console.log('   - App (dev):   http://localhost:3001');
-  console.log('   - SSR server:  http://localhost:3000');
-  console.log('   - Backend API: http://localhost:3001/api/v1 (separate process)');
+  console.log('   - App (dev):   http://localhost:3002  ← open this');
+  console.log('   - SSR server:  http://localhost:3000  (internal)');
+  console.log('   - Backend API: http://localhost:3001  (start separately)');
   console.log('\nRoutes:');
   console.log('   - http://localhost:3001/           -> Dashboard');
   console.log('   - http://localhost:3001/children   -> Children');
