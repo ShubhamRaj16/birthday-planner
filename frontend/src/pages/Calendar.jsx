@@ -234,8 +234,8 @@ export default function Calendar() {
   const dateMap = {};
 
   children.forEach((child, idx) => {
-    if (!child.dateOfBirth) return;
-    const dob = dayjs(child.dateOfBirth);
+    if (!child.dob) return;
+    const dob = dayjs(child.dob);
     // Project birthday onto current view year
     const key = `${viewYear}-${String(dob.month() + 1).padStart(2, '0')}-${String(dob.date()).padStart(2, '0')}`;
     if (!dateMap[key]) dateMap[key] = { birthdays: [], events: [] };

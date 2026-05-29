@@ -7,12 +7,18 @@ const errorHandler = require('./src/middleware/errorHandler');
 const app = express();
 const PORT = process.env.PORT || 3001;
 
+const ALLOWED_ORIGINS = [
+  'http://localhost:3000',  // SSR server
+  'http://localhost:3002',  // Webpack Dev Server
+  'http://localhost:5173',  // Vite (legacy)
+];
+
 app.use(cors({
   origin: (origin, callback) => {
     if (!origin) return callback(null, true);
     if (
-      origin === 'http://localhost:5173' ||
-      /^http:\/\/192\.168\.\d+\.\d+:5173$/.test(origin)
+      ALLOWED_ORIGINS.includes(origin) ||
+      /^http:\/\/192\.168\.\d+\.\d+:(3000|3002|5173)$/.test(origin)
     ) {
       return callback(null, true);
     }

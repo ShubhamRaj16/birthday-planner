@@ -25,7 +25,7 @@ model Child {
 model Event {
   id              Int          @id @default(autoincrement())
   childId         Int          @map("child_id")
-  child           Child        @relation(fields: [childId], references: [id])
+  child           Child        @relation(fields: [childId], references: [id], onDelete: Cascade)
   date            DateTime
   venue           String?
   address         String?
