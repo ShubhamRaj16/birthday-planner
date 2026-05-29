@@ -6,3 +6,69 @@ datasource db {
   provider = "sqlite"
   url      = env("DATABASE_URL")
 }
+
+model Child {
+  id        Int      @id @default(autoincrement())
+  name      String
+  dob       DateTime
+  photo     String?
+  interests String?
+  allergies String?
+  school    String?
+  events    Event[]
+  createdAt DateTime @default(now()) @map("created_at")
+  updatedAt DateTime @updatedAt @map("updated_at")
+
+  @@map("children")
+}
+
+model Event {
+  id              Int          @id @default(autoincrement())
+  childId         Int          @map("child_id")
+  child           Child        @relation(fields: [childId], references: [id])
+  date            DateTime
+  venue           String?
+  address         String?
+  theme           String?
+  budget          Float?
+  status          String       @default("Draft")
+  myGateLink      String?      @map("my_gate_link")
+  cardPath        String?      @map("card_path")
+  messageTemplate String?      @map("message_template")
+  notes           String?
+  tasks           Task[]
+  reminders       Reminder[]
+  createdAt       DateTime     @default(now()) @map("created_at")
+  updatedAt       DateTime     @updatedAt @map("updated_at")
+
+  @@map("events")
+}
+
+model Task {
+  id        Int      @id @default(autoincrement())
+  eventId   Int      @map("event_id")
+  event     Event    @relation(fields: [eventId], references: [id], onDelete: Cascade)
+  title     String
+  category  String
+  dueDate   DateTime? @map("due_date")
+  done      Boolean  @default(false)
+  notes     String?
+  createdAt DateTime @default(now()) @map("created_at")
+  updatedAt DateTime @updatedAt @map("updated_at")
+
+  @@map("tasks")
+}
+
+model Reminder {
+  id        Int      @id @default(autoincrement())
+  eventId   Int      @map("event_id")
+  event     Event    @relation(fields: [eventId], references: [id], onDelete: Cascade)
+  triggerAt DateTime @map("trigger_at")
+  fired     Boolean  @default(false)
+  label     String
+  type      String
+  createdAt DateTime @default(now()) @map("created_at")
+  updatedAt DateTime @updatedAt @map("updated_at")
+
+  @@map("reminders")
+}

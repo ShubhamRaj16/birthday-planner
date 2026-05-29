@@ -23,6 +23,13 @@ app.use(cors({
 app.use(express.json());
 app.use('/uploads', express.static(path.join(__dirname, 'uploads')));
 
+const childrenRouter = require('./src/routes/children');
+const eventsRouter = require('./src/routes/events');
+const remindersRouter = require('./src/routes/reminders');
+app.use('/api/v1/children', childrenRouter);
+app.use('/api/v1/events', eventsRouter);
+app.use('/api/v1/reminders', remindersRouter);
+
 app.get('/api/v1/health', (req, res) => {
   res.json({ data: { status: 'ok' }, error: null, meta: {} });
 });
@@ -31,9 +38,6 @@ app.use(errorHandler);
 
 app.listen(PORT, '0.0.0.0', () => {
   console.log(`Backend running on http://0.0.0.0:${PORT}`);
-  try {
-    require('./src/lib/prisma');
-  } catch (e) {
-    console.warn('Prisma client not yet generated (no models defined yet)');
-  }
+  require('./src/lib/prisma');
+  require('./src/lib/cron').startCronJobs();
 });
