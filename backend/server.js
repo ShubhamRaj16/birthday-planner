@@ -32,9 +32,11 @@ app.use('/uploads', express.static(path.join(__dirname, 'uploads')));
 const childrenRouter = require('./src/routes/children');
 const eventsRouter = require('./src/routes/events');
 const remindersRouter = require('./src/routes/reminders');
+const tasksRouter = require('./src/routes/tasks');
 app.use('/api/v1/children', childrenRouter);
 app.use('/api/v1/events', eventsRouter);
 app.use('/api/v1/reminders', remindersRouter);
+app.use('/api/v1/tasks', tasksRouter);
 
 app.get('/api/v1/health', (req, res) => {
   res.json({ data: { status: 'ok' }, error: null, meta: {} });

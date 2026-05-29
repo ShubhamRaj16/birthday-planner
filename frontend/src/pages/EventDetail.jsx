@@ -6,10 +6,6 @@ import dayjs from 'dayjs';
 import { fetchEvent, activateEvent } from '../redux/slices/eventsSlice';
 import apiClient from '../lib/apiClient';
 
-// TODO: Task update endpoint not yet implemented in backend.
-// Tasks need PUT /tasks/:id to toggle done. Currently this page shows tasks
-// read-only. Wire up task toggling once the backend endpoint exists.
-
 const BackLink = styled(Link)`
   color: #7c3aed;
   text-decoration: none;
@@ -180,8 +176,6 @@ export default function EventDetail() {
     dispatch(activateEvent(id));
   }
 
-  // TODO: Wire up task toggling once PUT /tasks/:id endpoint exists in backend.
-  // For now tasks are displayed as a read-only checklist.
   async function handleToggleTask(taskId, done) {
     try {
       await apiClient.put(`/tasks/${taskId}`, { done: !done });
