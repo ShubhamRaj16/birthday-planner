@@ -1,0 +1,18 @@
+{
+  "name": "birthday-planner",
+  "version": "1.0.0",
+  "private": true,
+  "description": "Local-first birthday party planner for kids",
+  "scripts": {
+    "dev": "concurrently -n backend,frontend -c green,cyan \"npm:dev:backend\" \"npm:dev:frontend\"",
+    "dev:backend": "cd backend && npm run dev",
+    "dev:frontend": "cd frontend && npm run dev",
+    "build": "cd frontend && npm run build",
+    "start": "cd backend && npm start",
+    "backup": "cd backend && node src/lib/backup.js",
+    "install:all": "npm install && cd backend && npm install && cd ../frontend && npm install"
+  },
+  "devDependencies": {
+    "concurrently": "^9.0.0"
+  }
+}

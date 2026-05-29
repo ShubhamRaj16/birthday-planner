@@ -1,0 +1,10 @@
+node_modules/
+.env
+backend/prisma/birthday.db
+backend/prisma/*.db-journal
+backend/prisma/*.db-wal
+backend/prisma/*.db-shm
+backend/uploads/**
+!backend/uploads/**/.gitkeep
+dist/
+.DS_Store
