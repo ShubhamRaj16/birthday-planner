@@ -1,7 +1,26 @@
 const prisma = require('../lib/prisma');
 
 async function listChildren() {
-  return prisma.child.findMany({ orderBy: { name: 'asc' } });
+  return prisma.child.findMany({
+    orderBy: { name: 'asc' },
+    include: {
+      events: {
+        orderBy: { date: 'asc' },
+        select: {
+          id: true,
+          date: true,
+          theme: true,
+          status: true,
+          googlePhotosUrl: true,
+          photos: {
+            where: { isCover: true },
+            select: { storagePath: true },
+            take: 1,
+          },
+        },
+      },
+    },
+  });
 }
 
 async function getChild(id) {
@@ -16,6 +35,7 @@ async function createChild(data) {
       interests: data.interests,
       allergies: data.allergies,
       school: data.school,
+      ...(data.photo && { photo: data.photo }),
     },
   });
 }

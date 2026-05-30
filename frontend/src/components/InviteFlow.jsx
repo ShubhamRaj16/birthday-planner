@@ -2,7 +2,7 @@ import { useEffect, useState } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import styled from 'styled-components';
 import dayjs from 'dayjs';
-import apiClient from '../lib/apiClient';
+import apiClient, { mediaUrl } from '../lib/apiClient';
 import { updateEvent } from '../redux/slices/eventsSlice';
 import { fetchGuests } from '../redux/slices/guestsSlice';
 
@@ -301,7 +301,7 @@ const EmptyMsg = styled.p`
 
 // ─── Component ────────────────────────────────────────────────────────────────
 
-export default function InviteFlow({ eventId, event, onRefresh }) {
+export default function InviteFlow({ eventId, event, onRefresh, suggestedTemplate }) {
   const dispatch = useDispatch();
   const guests = useSelector((state) => state.guests.byEventId[eventId] || []);
 
@@ -355,6 +355,11 @@ export default function InviteFlow({ eventId, event, onRefresh }) {
         .catch(() => {});
     }
   }, [event.messageTemplate, templateLoaded]);
+
+  // Apply AI-generated template when passed from parent
+  useEffect(() => {
+    if (suggestedTemplate) setTemplate(suggestedTemplate);
+  }, [suggestedTemplate]);
 
   // Sync myGateLink when event prop updates
   useEffect(() => {
@@ -512,9 +517,7 @@ export default function InviteFlow({ eventId, event, onRefresh }) {
   }
 
   // ── Card image URL ─────────────────────────────────────────────────────────
-  const cardImageUrl = event.cardPath
-    ? `http://${typeof window !== 'undefined' ? window.location.hostname : 'localhost'}:3001${event.cardPath}`
-    : null;
+  const cardImageUrl = event.cardPath ? mediaUrl(event.cardPath) : null;
 
   return (
     <FlowWrapper>

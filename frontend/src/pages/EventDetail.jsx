@@ -3,12 +3,14 @@ import { useParams, Link } from 'react-router-dom';
 import { useDispatch, useSelector } from 'react-redux';
 import styled from 'styled-components';
 import dayjs from 'dayjs';
-import { fetchEvent, activateEvent } from '../redux/slices/eventsSlice';
+import { fetchEvent, activateEvent, updateEvent } from '../redux/slices/eventsSlice';
 import GuestList from '../components/GuestList';
 import BudgetTracker from '../components/BudgetTracker';
 import GiftTracker from '../components/GiftTracker';
 import TaskChecklist from '../components/TaskChecklist';
 import InviteFlow from '../components/InviteFlow';
+import PhotoGallery from '../components/PhotoGallery';
+import AISuggestions from '../components/AISuggestions';
 
 // ─── Styled components ────────────────────────────────────────────────────────
 
@@ -196,6 +198,80 @@ const LoadingMsg = styled.p`
   padding: 2rem 0;
 `;
 
+// ─── Google Photos field ──────────────────────────────────────────────────────
+
+const GPRow = styled.div`
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  margin-top: 0.75rem;
+  flex-wrap: wrap;
+`;
+
+const GPInput = styled.input`
+  flex: 1;
+  min-width: 0;
+  padding: 0.4rem 0.7rem;
+  border: 1px solid #d1d5db;
+  border-radius: 6px;
+  font-size: 0.875rem;
+  &:focus { outline: none; border-color: #7c3aed; }
+`;
+
+const GPSaveBtn = styled.button`
+  background: #7c3aed;
+  color: #fff;
+  border: none;
+  border-radius: 6px;
+  padding: 0.4rem 0.9rem;
+  font-size: 0.82rem;
+  font-weight: 600;
+  cursor: pointer;
+  white-space: nowrap;
+  &:hover { background: #6d28d9; }
+`;
+
+const GPLink = styled.a`
+  color: #7c3aed;
+  font-size: 0.875rem;
+  font-weight: 600;
+  text-decoration: none;
+  &:hover { text-decoration: underline; }
+`;
+
+function GooglePhotosField({ eventId, event }) {
+  const dispatch = useDispatch();
+  const [url, setUrl] = useState(event.googlePhotosUrl || '');
+  const [saved, setSaved] = useState(false);
+
+  useEffect(() => { setUrl(event.googlePhotosUrl || ''); }, [event.googlePhotosUrl]);
+
+  async function handleSave() {
+    await dispatch(updateEvent({ id: eventId, data: { googlePhotosUrl: url.trim() || null } }));
+    setSaved(true);
+    setTimeout(() => setSaved(false), 2000);
+  }
+
+  return (
+    <div style={{ marginTop: '0.75rem' }}>
+      <InfoLabel>Google Photos Album</InfoLabel>
+      <GPRow>
+        <GPInput
+          value={url}
+          onChange={(e) => setUrl(e.target.value)}
+          placeholder="Paste Google Photos shared album URL"
+        />
+        <GPSaveBtn onClick={handleSave}>{saved ? 'Saved' : 'Save'}</GPSaveBtn>
+        {event.googlePhotosUrl && (
+          <GPLink href={event.googlePhotosUrl} target="_blank" rel="noopener noreferrer">
+            Open Album ↗
+          </GPLink>
+        )}
+      </GPRow>
+    </div>
+  );
+}
+
 // ─── Tabs config ─────────────────────────────────────────────────────────────
 
 const WarningBanner = styled.div`
@@ -216,6 +292,8 @@ const TABS = [
   { id: 'budget',  label: 'Budget'  },
   { id: 'gifts',   label: 'Gifts'   },
   { id: 'invites', label: 'Invites' },
+  { id: 'photos',  label: 'Photos'  },
+  { id: 'ai',      label: '✨ AI'   },
 ];
 
 // ─── Component ────────────────────────────────────────────────────────────────
@@ -226,6 +304,7 @@ export default function EventDetail() {
   const { current: event, loading, error } = useSelector((state) => state.events);
 
   const [activeTab, setActiveTab] = useState('tasks');
+  const [pendingAiTemplate, setPendingAiTemplate] = useState(null);
 
   // Initial fetch
   useEffect(() => {
@@ -317,6 +396,7 @@ export default function EventDetail() {
             </InfoRow>
           )}
         </InfoGrid>
+        <GooglePhotosField eventId={id} event={event} />
       </Section>
 
       {/* Tab bar */}
@@ -361,7 +441,30 @@ export default function EventDetail() {
           </>
         )}
         {activeTab === 'invites' && (
-          <InviteFlow eventId={id} event={event} onRefresh={handleRefresh} />
+          <InviteFlow
+            eventId={id}
+            event={event}
+            onRefresh={handleRefresh}
+            suggestedTemplate={pendingAiTemplate}
+          />
+        )}
+        {activeTab === 'photos' && (
+          <>
+            <SectionTitle>Photos</SectionTitle>
+            <PhotoGallery eventId={id} />
+          </>
+        )}
+        {activeTab === 'ai' && (
+          <>
+            <SectionTitle>AI Suggestions</SectionTitle>
+            <AISuggestions
+              eventId={id}
+              onUseTemplate={(template) => {
+                setPendingAiTemplate(template);
+                setActiveTab('invites');
+              }}
+            />
+          </>
         )}
       </Section>
     </div>

@@ -1,7 +1,9 @@
 import { useEffect, useState } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import styled from 'styled-components';
+import dayjs from 'dayjs';
 import { fetchChildren, createChild, updateChild, deleteChild } from '../redux/slices/childrenSlice';
+import { mediaUrl } from '../lib/apiClient';
 
 const PageTitle = styled.h1`
   font-size: 1.6rem;
@@ -204,6 +206,93 @@ const EmptyState = styled.div`
   border: 1px dashed #d1d5db;
   border-radius: 10px;
   color: #6b7280;
+`;
+
+// ─── Timeline styles ──────────────────────────────────────────────────────────
+
+const TimelineSection = styled.div`
+  margin-top: 2rem;
+`;
+
+const TimelineTitle = styled.h2`
+  font-size: 1.1rem;
+  font-weight: 700;
+  color: #1f2937;
+  margin-bottom: 1rem;
+`;
+
+const TimelineChild = styled.div`
+  margin-bottom: 1.5rem;
+`;
+
+const TimelineChildName = styled.h3`
+  font-size: 0.95rem;
+  font-weight: 600;
+  color: #7c3aed;
+  margin-bottom: 0.6rem;
+`;
+
+const TimelineRow = styled.div`
+  display: flex;
+  gap: 0.75rem;
+  flex-wrap: wrap;
+`;
+
+const TimelineCard = styled.div`
+  border: 1px solid #e5e7eb;
+  border-radius: 8px;
+  overflow: hidden;
+  width: 140px;
+  background: #fff;
+  flex-shrink: 0;
+`;
+
+const TimelineThumb = styled.img`
+  width: 140px;
+  height: 100px;
+  object-fit: cover;
+  display: block;
+  background: #f3f4f6;
+`;
+
+const TimelineThumbPlaceholder = styled.div`
+  width: 140px;
+  height: 100px;
+  background: #ede9fe;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 1.5rem;
+`;
+
+const TimelineCardBody = styled.div`
+  padding: 0.4rem 0.6rem;
+`;
+
+const TimelineYear = styled.p`
+  font-size: 0.78rem;
+  font-weight: 700;
+  color: #374151;
+  margin: 0;
+`;
+
+const TimelineTheme = styled.p`
+  font-size: 0.72rem;
+  color: #6b7280;
+  margin: 0;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+`;
+
+const TimelineLink = styled.a`
+  font-size: 0.72rem;
+  color: #7c3aed;
+  font-weight: 600;
+  text-decoration: none;
+  display: block;
+  margin-top: 2px;
+  &:hover { text-decoration: underline; }
 `;
 
 function getAge(dobStr) {
@@ -429,7 +518,10 @@ export default function Children() {
               <CardTop>
                 <Avatar>
                   {child.photo ? (
-                    <img src={`http://localhost:3001${child.photo}`} alt={child.name} />
+                    <img
+                      src={mediaUrl(child.photo)}
+                      alt={child.name}
+                    />
                   ) : (
                     initial
                   )}
@@ -464,6 +556,53 @@ export default function Children() {
           );
         })}
       </Grid>
+
+      {/* Year-on-year memories timeline */}
+      {children.some((c) => (c.events || []).length > 0) && (
+        <TimelineSection>
+          <TimelineTitle>Memories — Year by Year</TimelineTitle>
+          {children.map((child) => {
+            const events = (child.events || []).filter((e) => e.status !== 'Draft');
+            if (events.length === 0) return null;
+            return (
+              <TimelineChild key={child.id}>
+                <TimelineChildName>{child.name}</TimelineChildName>
+                <TimelineRow>
+                  {events.map((event) => {
+                    const coverPhoto = event.photos?.[0];
+                    const year = dayjs(event.date).format('YYYY');
+                    return (
+                      <TimelineCard key={event.id}>
+                        {coverPhoto ? (
+                          <TimelineThumb
+                            src={mediaUrl(coverPhoto.storagePath)}
+                            alt={event.theme || year}
+                          />
+                        ) : (
+                          <TimelineThumbPlaceholder>🎂</TimelineThumbPlaceholder>
+                        )}
+                        <TimelineCardBody>
+                          <TimelineYear>{year}</TimelineYear>
+                          <TimelineTheme>{event.theme || 'Birthday Party'}</TimelineTheme>
+                          {event.googlePhotosUrl && (
+                            <TimelineLink
+                              href={event.googlePhotosUrl}
+                              target="_blank"
+                              rel="noopener noreferrer"
+                            >
+                              Photos ↗
+                            </TimelineLink>
+                          )}
+                        </TimelineCardBody>
+                      </TimelineCard>
+                    );
+                  })}
+                </TimelineRow>
+              </TimelineChild>
+            );
+          })}
+        </TimelineSection>
+      )}
     </div>
   );
 }

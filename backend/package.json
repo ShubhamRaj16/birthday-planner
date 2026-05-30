@@ -4,11 +4,13 @@
   "main": "server.js",
   "scripts": {
     "dev": "nodemon server.js",
-    "start": "node server.js"
+    "start": "node server.js",
+    "backup": "node src/lib/backup.js"
   },
   "dependencies": {
     "@anthropic-ai/sdk": "^0.24.0",
     "@prisma/client": "^5.14.0",
+    "archiver": "^6.0.2",
     "cors": "^2.8.5",
     "dayjs": "^1.11.21",
     "dotenv": "^16.4.5",
