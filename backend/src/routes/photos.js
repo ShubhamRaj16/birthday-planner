@@ -7,7 +7,9 @@ const photoService = require('../services/photoService');
 
 const storage = multer.diskStorage({
   destination(req, file, cb) {
-    const dir = path.join(__dirname, '../../../uploads/photos', String(req.params.eventId));
+    const safeId = parseInt(req.params.eventId, 10);
+    if (!Number.isInteger(safeId) || safeId <= 0) return cb(new Error('invalid eventId'));
+    const dir = path.join(__dirname, '../../../uploads/photos', String(safeId));
     fs.mkdirSync(dir, { recursive: true });
     cb(null, dir);
   },

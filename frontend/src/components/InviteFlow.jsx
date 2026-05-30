@@ -2,7 +2,7 @@ import { useEffect, useState } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import styled from 'styled-components';
 import dayjs from 'dayjs';
-import apiClient from '../lib/apiClient';
+import apiClient, { mediaUrl } from '../lib/apiClient';
 import { updateEvent } from '../redux/slices/eventsSlice';
 import { fetchGuests } from '../redux/slices/guestsSlice';
 
@@ -517,9 +517,7 @@ export default function InviteFlow({ eventId, event, onRefresh, suggestedTemplat
   }
 
   // ── Card image URL ─────────────────────────────────────────────────────────
-  const cardImageUrl = event.cardPath
-    ? `http://${typeof window !== 'undefined' ? window.location.hostname : 'localhost'}:3001${event.cardPath}`
-    : null;
+  const cardImageUrl = event.cardPath ? mediaUrl(event.cardPath) : null;
 
   return (
     <FlowWrapper>

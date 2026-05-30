@@ -3,6 +3,7 @@ import { useDispatch, useSelector } from 'react-redux';
 import { Link } from 'react-router-dom';
 import styled from 'styled-components';
 import dayjs from 'dayjs';
+import { mediaUrl } from '../lib/apiClient';
 import { fetchChildren } from '../redux/slices/childrenSlice';
 import { fetchUpcoming } from '../redux/slices/eventsSlice';
 
@@ -194,7 +195,7 @@ function ChildBirthdayCard({ child }) {
   return (
     <Card>
       <Avatar>
-        {child.photo ? <img src={`http://localhost:3001${child.photo}`} alt={child.name} /> : initial}
+        {child.photo ? <img src={mediaUrl(child.photo)} alt={child.name} /> : initial}
       </Avatar>
       <CardInfo>
         <ChildName>{child.name}</ChildName>

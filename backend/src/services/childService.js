@@ -35,6 +35,7 @@ async function createChild(data) {
       interests: data.interests,
       allergies: data.allergies,
       school: data.school,
+      ...(data.photo && { photo: data.photo }),
     },
   });
 }
