@@ -33,10 +33,18 @@ const childrenRouter = require('./src/routes/children');
 const eventsRouter = require('./src/routes/events');
 const remindersRouter = require('./src/routes/reminders');
 const tasksRouter = require('./src/routes/tasks');
+const guestsRouter = require('./src/routes/guests');
+const expensesRouter = require('./src/routes/expenses');
+const giftsRouter = require('./src/routes/gifts');
+const eventTasksRouter = require('./src/routes/eventTasks');
 app.use('/api/v1/children', childrenRouter);
 app.use('/api/v1/events', eventsRouter);
 app.use('/api/v1/reminders', remindersRouter);
 app.use('/api/v1/tasks', tasksRouter);
+app.use('/api/v1/events/:eventId/guests', guestsRouter);
+app.use('/api/v1/events/:eventId/expenses', expensesRouter);
+app.use('/api/v1/events/:eventId/gifts', giftsRouter);
+app.use('/api/v1/events/:eventId/tasks', eventTasksRouter);
 
 app.get('/api/v1/health', (req, res) => {
   res.json({ data: { status: 'ok' }, error: null, meta: {} });
