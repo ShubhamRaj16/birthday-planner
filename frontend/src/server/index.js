@@ -77,16 +77,17 @@ const PORT = process.env.PORT || 3000;
 const clientBuildPath = path.resolve(process.cwd(), 'dist/client');
 const isDevelopment = process.env.NODE_ENV !== 'production';
 
-const knownPaths = new Set(
-  serverRoutes.filter((r) => r.path !== '*').map((r) => r.path)
-);
+// Convert route patterns to regexes so /events/1 matches /events/:id
+const knownPatterns = serverRoutes
+  .filter((r) => r.path !== '*')
+  .map((r) => new RegExp('^' + r.path.replace(/:[^/]+/g, '[^/]+') + '$'));
 
 // Read once at startup — server restarts on recompile in dev so this stays fresh
 const clientAssets = getClientAssets();
 
 function getStatusCode(req) {
   if (isDevelopment) return 200;
-  return knownPaths.has(req.path) ? 200 : 404;
+  return knownPatterns.some((re) => re.test(req.path)) ? 200 : 404;
 }
 
 // Serve static files
