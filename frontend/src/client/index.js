@@ -7,6 +7,9 @@ import { configureStore } from '@reduxjs/toolkit';
 import childrenReducer from '../redux/slices/childrenSlice';
 import eventsReducer from '../redux/slices/eventsSlice';
 import remindersReducer from '../redux/slices/remindersSlice';
+import guestsReducer from '../redux/slices/guestsSlice';
+import expensesReducer from '../redux/slices/expensesSlice';
+import giftsReducer from '../redux/slices/giftsSlice';
 import App from '../App';
 import { createClientRoutes } from '../routes/clientRoutes';
 import './index.css';
@@ -19,6 +22,9 @@ const store = configureStore({
     children: childrenReducer,
     events: eventsReducer,
     reminders: remindersReducer,
+    guests: guestsReducer,
+    expenses: expensesReducer,
+    gifts: giftsReducer,
   },
   preloadedState: initialState,
 });
