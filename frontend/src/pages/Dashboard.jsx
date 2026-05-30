@@ -159,6 +159,23 @@ const ReminderBanner = styled(Link)`
   }
 `;
 
+const MyGateWarning = styled(Link)`
+  display: inline-block;
+  font-size: 0.75rem;
+  color: #9a3412;
+  background: #fff7ed;
+  border: 1px solid #fb923c;
+  border-radius: 5px;
+  padding: 2px 8px;
+  margin-top: 4px;
+  text-decoration: none;
+  font-weight: 500;
+
+  &:hover {
+    background: #fed7aa;
+  }
+`;
+
 function getDaysUntilBirthday(dobStr) {
   if (!dobStr) return null;
   const today = dayjs();
@@ -242,19 +259,33 @@ export default function Dashboard() {
         </EmptyState>
       ) : (
         <div>
-          {events.slice(0, 5).map((event) => (
-            <EventItem key={event.id}>
-              <EventMeta>
-                <EventName>{event.theme || 'Birthday Party'}</EventName>
-                <EventDate>
-                  {event.child?.name && `${event.child.name} — `}
-                  {event.date ? dayjs(event.date).format('MMM D, YYYY') : 'Date TBD'}
-                  {event.venue ? ` @ ${event.venue}` : ''}
-                </EventDate>
-              </EventMeta>
-              <StatusBadge status={event.status}>{event.status}</StatusBadge>
-            </EventItem>
-          ))}
+          {events.slice(0, 5).map((event) => {
+            const daysUntil = event.date ? dayjs(event.date).diff(dayjs(), 'day') : null;
+            const showMyGateWarning =
+              event.status === 'Active' &&
+              !event.myGateLink &&
+              daysUntil !== null &&
+              daysUntil >= 0 &&
+              daysUntil <= 14;
+            return (
+              <EventItem key={event.id}>
+                <EventMeta>
+                  <EventName>{event.theme || 'Birthday Party'}</EventName>
+                  <EventDate>
+                    {event.child?.name && `${event.child.name} — `}
+                    {event.date ? dayjs(event.date).format('MMM D, YYYY') : 'Date TBD'}
+                    {event.venue ? ` @ ${event.venue}` : ''}
+                  </EventDate>
+                  {showMyGateWarning && (
+                    <MyGateWarning to={`/events/${event.id}`}>
+                      &#9888;&#65039; Add MyGate link
+                    </MyGateWarning>
+                  )}
+                </EventMeta>
+                <StatusBadge status={event.status}>{event.status}</StatusBadge>
+              </EventItem>
+            );
+          })}
           <ActionLink to="/events" style={{ display: 'block', marginTop: '0.75rem' }}>
             View all events
           </ActionLink>

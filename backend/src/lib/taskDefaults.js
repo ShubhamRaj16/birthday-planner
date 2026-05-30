@@ -8,6 +8,7 @@ const TASK_DEFAULTS = [
   { title: 'Arrange decorations', category: 'decorations', daysOffset: -14 },
   { title: 'Confirm entertainment', category: 'entertainment', daysOffset: -14 },
   { title: 'Prepare return gifts', category: 'return gifts', daysOffset: -7 },
+  { title: 'Add MyGate invite link to event', category: 'invites/printing', daysOffset: -7 },
   { title: 'Confirm headcount with venue', category: 'venue', daysOffset: -3 },
   { title: 'Day-of setup', category: 'miscellaneous', daysOffset: 0 },
 ];

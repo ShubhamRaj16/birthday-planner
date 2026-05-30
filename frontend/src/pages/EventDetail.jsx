@@ -8,6 +8,7 @@ import GuestList from '../components/GuestList';
 import BudgetTracker from '../components/BudgetTracker';
 import GiftTracker from '../components/GiftTracker';
 import TaskChecklist from '../components/TaskChecklist';
+import InviteFlow from '../components/InviteFlow';
 
 // ─── Styled components ────────────────────────────────────────────────────────
 
@@ -197,11 +198,24 @@ const LoadingMsg = styled.p`
 
 // ─── Tabs config ─────────────────────────────────────────────────────────────
 
+const WarningBanner = styled.div`
+  background: #fff7ed;
+  border: 1px solid #fb923c;
+  border-radius: 8px;
+  padding: 0.65rem 1rem;
+  font-size: 0.875rem;
+  color: #9a3412;
+  font-weight: 500;
+  margin-top: 0.5rem;
+  width: 100%;
+`;
+
 const TABS = [
-  { id: 'tasks',   label: 'Tasks'  },
-  { id: 'guests',  label: 'Guests' },
-  { id: 'budget',  label: 'Budget' },
-  { id: 'gifts',   label: 'Gifts'  },
+  { id: 'tasks',   label: 'Tasks'   },
+  { id: 'guests',  label: 'Guests'  },
+  { id: 'budget',  label: 'Budget'  },
+  { id: 'gifts',   label: 'Gifts'   },
+  { id: 'invites', label: 'Invites' },
 ];
 
 // ─── Component ────────────────────────────────────────────────────────────────
@@ -261,6 +275,14 @@ export default function EventDetail() {
         {event.child && <MetaItem>For {event.child.name}</MetaItem>}
         {event.date && (
           <MetaItem>{dayjs(event.date).format('dddd, MMMM D, YYYY')}</MetaItem>
+        )}
+        {event.status === 'Active' &&
+          !event.myGateLink &&
+          dayjs(event.date).diff(dayjs(), 'day') <= 14 &&
+          dayjs(event.date).diff(dayjs(), 'day') >= 0 && (
+          <WarningBanner>
+            &#9888;&#65039; Event is in {dayjs(event.date).diff(dayjs(), 'day')} days — add your MyGate link in the Invites tab
+          </WarningBanner>
         )}
       </MetaRow>
 
@@ -337,6 +359,9 @@ export default function EventDetail() {
             <SectionTitle>Gifts</SectionTitle>
             <GiftTracker eventId={id} />
           </>
+        )}
+        {activeTab === 'invites' && (
+          <InviteFlow eventId={id} event={event} onRefresh={handleRefresh} />
         )}
       </Section>
     </div>
