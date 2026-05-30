@@ -2,6 +2,7 @@ import { useEffect, useRef, useState } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import styled from 'styled-components';
 import { fetchPhotos, uploadPhoto, updatePhoto, deletePhoto } from '../redux/slices/photosSlice';
+import { mediaUrl } from '../lib/apiClient';
 
 // ─── Styled components ────────────────────────────────────────────────────────
 
@@ -182,7 +183,7 @@ export default function PhotoGallery({ eventId }) {
   }
 
   function getPhotoUrl(storagePath) {
-    return `http://${window.location.hostname}:3001${storagePath}`;
+    return mediaUrl(storagePath);
   }
 
   return (

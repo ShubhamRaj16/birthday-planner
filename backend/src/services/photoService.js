@@ -24,9 +24,12 @@ async function updatePhoto(id, data) {
 }
 
 async function setCover(eventId, photoId) {
-  // Clear existing cover, then set new one
-  await prisma.photo.updateMany({ where: { eventId }, data: { isCover: false } });
-  return prisma.photo.update({ where: { id: photoId }, data: { isCover: true } });
+  // Atomic: clear all covers then set the new one in a single transaction
+  const [, photo] = await prisma.$transaction([
+    prisma.photo.updateMany({ where: { eventId }, data: { isCover: false } }),
+    prisma.photo.update({ where: { id: photoId }, data: { isCover: true } }),
+  ]);
+  return photo;
 }
 
 async function deletePhoto(id) {

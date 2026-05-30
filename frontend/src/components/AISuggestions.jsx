@@ -1,8 +1,6 @@
 import { useState } from 'react';
-import { useDispatch } from 'react-redux';
 import styled from 'styled-components';
 import apiClient from '../lib/apiClient';
-import { createAsyncThunk } from '@reduxjs/toolkit';
 
 // Inline thunk for saving a gift suggestion — reuses the gifts API
 async function saveGiftSuggestion(eventId, name) {

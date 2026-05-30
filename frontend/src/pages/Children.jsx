@@ -3,6 +3,7 @@ import { useDispatch, useSelector } from 'react-redux';
 import styled from 'styled-components';
 import dayjs from 'dayjs';
 import { fetchChildren, createChild, updateChild, deleteChild } from '../redux/slices/childrenSlice';
+import { mediaUrl } from '../lib/apiClient';
 
 const PageTitle = styled.h1`
   font-size: 1.6rem;
@@ -518,7 +519,7 @@ export default function Children() {
                 <Avatar>
                   {child.photo ? (
                     <img
-                      src={`http://${window.location.hostname}:3001${child.photo}`}
+                      src={mediaUrl(child.photo)}
                       alt={child.name}
                     />
                   ) : (
@@ -574,7 +575,7 @@ export default function Children() {
                       <TimelineCard key={event.id}>
                         {coverPhoto ? (
                           <TimelineThumb
-                            src={`http://${window.location.hostname}:3001${coverPhoto.storagePath}`}
+                            src={mediaUrl(coverPhoto.storagePath)}
                             alt={event.theme || year}
                           />
                         ) : (

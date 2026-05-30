@@ -48,6 +48,9 @@ const photosSlice = createSlice({
         if (!state.byEventId[eventId]) state.byEventId[eventId] = [];
         state.byEventId[eventId].push(photo);
       })
+      .addCase(uploadPhoto.rejected, (state, action) => {
+        state.error = action.error.message;
+      })
       .addCase(updatePhoto.fulfilled, (state, action) => {
         const { eventId, photo } = action.payload;
         const list = state.byEventId[eventId] || [];
@@ -58,11 +61,17 @@ const photosSlice = createSlice({
           list[idx] = photo;
         }
       })
+      .addCase(updatePhoto.rejected, (state, action) => {
+        state.error = action.error.message;
+      })
       .addCase(deletePhoto.fulfilled, (state, action) => {
         const { eventId, photoId } = action.payload;
         if (state.byEventId[eventId]) {
           state.byEventId[eventId] = state.byEventId[eventId].filter((p) => p.id !== photoId);
         }
+      })
+      .addCase(deletePhoto.rejected, (state, action) => {
+        state.error = action.error.message;
       });
   },
 });
