@@ -1,10 +1,15 @@
-import { useEffect } from 'react';
+import { useEffect, useState } from 'react';
 import { useParams, Link } from 'react-router-dom';
 import { useDispatch, useSelector } from 'react-redux';
 import styled from 'styled-components';
 import dayjs from 'dayjs';
 import { fetchEvent, activateEvent } from '../redux/slices/eventsSlice';
-import apiClient from '../lib/apiClient';
+import GuestList from '../components/GuestList';
+import BudgetTracker from '../components/BudgetTracker';
+import GiftTracker from '../components/GiftTracker';
+import TaskChecklist from '../components/TaskChecklist';
+
+// ─── Styled components ────────────────────────────────────────────────────────
 
 const BackLink = styled(Link)`
   color: #7c3aed;
@@ -21,11 +26,27 @@ const BackLink = styled(Link)`
   }
 `;
 
+const HeaderRow = styled.div`
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 1rem;
+  flex-wrap: wrap;
+  margin-bottom: 0.4rem;
+`;
+
 const PageTitle = styled.h1`
   font-size: 1.5rem;
   font-weight: 700;
   color: #1f2937;
-  margin-bottom: 0.5rem;
+  margin: 0;
+`;
+
+const HeaderActions = styled.div`
+  display: flex;
+  gap: 0.6rem;
+  flex-wrap: wrap;
+  align-items: center;
 `;
 
 const MetaRow = styled.div`
@@ -99,37 +120,35 @@ const InfoValue = styled.span`
   color: #111827;
 `;
 
-const TaskList = styled.ul`
-  list-style: none;
-  padding: 0;
-  margin: 0;
+// ─── Tab bar ─────────────────────────────────────────────────────────────────
+
+const TabBar = styled.div`
+  display: flex;
+  gap: 0;
+  border-bottom: 2px solid #e5e7eb;
+  margin-bottom: 1.25rem;
+  overflow-x: auto;
 `;
 
-const TaskItem = styled.li`
-  display: flex;
-  align-items: center;
-  gap: 0.75rem;
-  padding: 0.45rem 0;
-  border-bottom: 1px solid #f9fafb;
+const TabButton = styled.button`
+  background: none;
+  border: none;
+  padding: 0.6rem 1.25rem;
+  font-size: 0.9rem;
+  font-weight: 600;
+  cursor: pointer;
+  color: ${({ $active }) => ($active ? '#7c3aed' : '#6b7280')};
+  border-bottom: 2.5px solid ${({ $active }) => ($active ? '#7c3aed' : 'transparent')};
+  margin-bottom: -2px;
+  white-space: nowrap;
+  transition: color 0.15s, border-color 0.15s;
 
-  &:last-child {
-    border-bottom: none;
+  &:hover {
+    color: #7c3aed;
   }
 `;
 
-const TaskCheckbox = styled.input`
-  accent-color: #7c3aed;
-  width: 16px;
-  height: 16px;
-  cursor: pointer;
-`;
-
-const TaskLabel = styled.label`
-  font-size: 0.88rem;
-  color: ${({ $done }) => ($done ? '#9ca3af' : '#111827')};
-  text-decoration: ${({ $done }) => ($done ? 'line-through' : 'none')};
-  cursor: pointer;
-`;
+// ─── Buttons ─────────────────────────────────────────────────────────────────
 
 const Button = styled.button`
   background: #7c3aed;
@@ -152,6 +171,19 @@ const Button = styled.button`
   }
 `;
 
+const RefreshBtn = styled.button`
+  background: #fff;
+  color: #7c3aed;
+  border: 1.5px solid #7c3aed;
+  border-radius: 8px;
+  padding: 0.45rem 0.9rem;
+  font-size: 0.875rem;
+  font-weight: 600;
+  cursor: pointer;
+
+  &:hover { background: #f3f0ff; }
+`;
+
 const ErrorMsg = styled.p`
   color: #b91c1c;
   font-size: 0.85rem;
@@ -163,30 +195,45 @@ const LoadingMsg = styled.p`
   padding: 2rem 0;
 `;
 
+// ─── Tabs config ─────────────────────────────────────────────────────────────
+
+const TABS = [
+  { id: 'tasks',   label: 'Tasks'  },
+  { id: 'guests',  label: 'Guests' },
+  { id: 'budget',  label: 'Budget' },
+  { id: 'gifts',   label: 'Gifts'  },
+];
+
+// ─── Component ────────────────────────────────────────────────────────────────
+
 export default function EventDetail() {
   const { id } = useParams();
   const dispatch = useDispatch();
   const { current: event, loading, error } = useSelector((state) => state.events);
 
+  const [activeTab, setActiveTab] = useState('tasks');
+
+  // Initial fetch
   useEffect(() => {
     if (id) dispatch(fetchEvent(id));
+  }, [id, dispatch]);
+
+  // 30s polling (SCRUM-19)
+  useEffect(() => {
+    if (!id) return;
+    const timer = setInterval(() => dispatch(fetchEvent(id)), 30000);
+    return () => clearInterval(timer);
   }, [id, dispatch]);
 
   function handleActivate() {
     dispatch(activateEvent(id));
   }
 
-  async function handleToggleTask(taskId, done) {
-    try {
-      await apiClient.put(`/tasks/${taskId}`, { done: !done });
-      // Re-fetch event to get updated tasks
-      dispatch(fetchEvent(id));
-    } catch (err) {
-      console.error('Task update failed — PUT /tasks/:id not yet implemented:', err.message);
-    }
+  function handleRefresh() {
+    dispatch(fetchEvent(id));
   }
 
-  if (loading) return <LoadingMsg>Loading event...</LoadingMsg>;
+  if (loading && !event) return <LoadingMsg>Loading event...</LoadingMsg>;
   if (!event) return <LoadingMsg>Event not found.</LoadingMsg>;
 
   const tasks = event.tasks || [];
@@ -195,7 +242,19 @@ export default function EventDetail() {
     <div>
       <BackLink to="/events">&larr; Back to Events</BackLink>
 
-      <PageTitle>{event.theme || 'Birthday Party'}</PageTitle>
+      <HeaderRow>
+        <PageTitle>{event.theme || 'Birthday Party'}</PageTitle>
+        <HeaderActions>
+          <RefreshBtn onClick={handleRefresh} title="Refresh event data">
+            &#x21bb; Refresh
+          </RefreshBtn>
+          {event.status === 'Draft' && (
+            <Button onClick={handleActivate} disabled={loading}>
+              Activate Event
+            </Button>
+          )}
+        </HeaderActions>
+      </HeaderRow>
 
       <MetaRow>
         <StatusBadge status={event.status}>{event.status}</StatusBadge>
@@ -203,15 +262,11 @@ export default function EventDetail() {
         {event.date && (
           <MetaItem>{dayjs(event.date).format('dddd, MMMM D, YYYY')}</MetaItem>
         )}
-        {event.status === 'Draft' && (
-          <Button onClick={handleActivate} disabled={loading}>
-            Activate Event
-          </Button>
-        )}
       </MetaRow>
 
       {error && <ErrorMsg>{error}</ErrorMsg>}
 
+      {/* Event details summary */}
       <Section>
         <SectionTitle>Event Details</SectionTitle>
         <InfoGrid>
@@ -242,26 +297,46 @@ export default function EventDetail() {
         </InfoGrid>
       </Section>
 
+      {/* Tab bar */}
+      <TabBar role="tablist">
+        {TABS.map((tab) => (
+          <TabButton
+            key={tab.id}
+            role="tab"
+            aria-selected={activeTab === tab.id}
+            $active={activeTab === tab.id}
+            onClick={() => setActiveTab(tab.id)}
+          >
+            {tab.label}
+          </TabButton>
+        ))}
+      </TabBar>
+
+      {/* Tab panels */}
       <Section>
-        <SectionTitle>Tasks ({tasks.filter((t) => t.done).length}/{tasks.length} done)</SectionTitle>
-        {tasks.length === 0 ? (
-          <p style={{ color: '#6b7280', fontSize: '0.875rem' }}>No tasks yet.</p>
-        ) : (
-          <TaskList>
-            {tasks.map((task) => (
-              <TaskItem key={task.id}>
-                <TaskCheckbox
-                  type="checkbox"
-                  id={`task-${task.id}`}
-                  checked={!!task.done}
-                  onChange={() => handleToggleTask(task.id, task.done)}
-                />
-                <TaskLabel htmlFor={`task-${task.id}`} $done={task.done}>
-                  {task.title}
-                </TaskLabel>
-              </TaskItem>
-            ))}
-          </TaskList>
+        {activeTab === 'tasks' && (
+          <>
+            <SectionTitle>Tasks</SectionTitle>
+            <TaskChecklist eventId={id} tasks={tasks} onRefresh={handleRefresh} />
+          </>
+        )}
+        {activeTab === 'guests' && (
+          <>
+            <SectionTitle>Guests</SectionTitle>
+            <GuestList eventId={id} />
+          </>
+        )}
+        {activeTab === 'budget' && (
+          <>
+            <SectionTitle>Budget</SectionTitle>
+            <BudgetTracker eventId={id} eventBudget={event.budget} />
+          </>
+        )}
+        {activeTab === 'gifts' && (
+          <>
+            <SectionTitle>Gifts</SectionTitle>
+            <GiftTracker eventId={id} />
+          </>
         )}
       </Section>
     </div>
