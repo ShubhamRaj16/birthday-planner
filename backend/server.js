@@ -7,12 +7,18 @@ const errorHandler = require('./src/middleware/errorHandler');
 const app = express();
 const PORT = process.env.PORT || 3001;
 
+const ALLOWED_ORIGINS = [
+  'http://localhost:3000',  // SSR server
+  'http://localhost:3002',  // Webpack Dev Server
+  'http://localhost:5173',  // Vite (legacy)
+];
+
 app.use(cors({
   origin: (origin, callback) => {
     if (!origin) return callback(null, true);
     if (
-      origin === 'http://localhost:5173' ||
-      /^http:\/\/192\.168\.\d+\.\d+:5173$/.test(origin)
+      ALLOWED_ORIGINS.includes(origin) ||
+      /^http:\/\/192\.168\.\d+\.\d+:(3000|3002|5173)$/.test(origin)
     ) {
       return callback(null, true);
     }
@@ -26,9 +32,19 @@ app.use('/uploads', express.static(path.join(__dirname, 'uploads')));
 const childrenRouter = require('./src/routes/children');
 const eventsRouter = require('./src/routes/events');
 const remindersRouter = require('./src/routes/reminders');
+const tasksRouter = require('./src/routes/tasks');
+const guestsRouter = require('./src/routes/guests');
+const expensesRouter = require('./src/routes/expenses');
+const giftsRouter = require('./src/routes/gifts');
+const eventTasksRouter = require('./src/routes/eventTasks');
 app.use('/api/v1/children', childrenRouter);
 app.use('/api/v1/events', eventsRouter);
 app.use('/api/v1/reminders', remindersRouter);
+app.use('/api/v1/tasks', tasksRouter);
+app.use('/api/v1/events/:eventId/guests', guestsRouter);
+app.use('/api/v1/events/:eventId/expenses', expensesRouter);
+app.use('/api/v1/events/:eventId/gifts', giftsRouter);
+app.use('/api/v1/events/:eventId/tasks', eventTasksRouter);
 
 app.get('/api/v1/health', (req, res) => {
   res.json({ data: { status: 'ok' }, error: null, meta: {} });

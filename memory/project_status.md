@@ -5,16 +5,26 @@ metadata:
   type: project
 ---
 
-As of 2026-05-29, the project is a blank monorepo scaffold. Only one commit exists ("chore: scaffold birthday-planner monorepo").
+As of 2026-05-30, Phase 1 (Core Shell) is complete.
 
 **What exists:**
-- Root `package.json` with `npm run dev` (concurrently runs both services), `install:all`, `backup` scripts
-- `.env.example` — needs copying to `.env` with real `ANTHROPIC_API_KEY`
-- `backend/` — empty `src/{lib,middleware,routes,services}/`, empty `prisma/`, `uploads/{avatars,invite-cards,photos,receipts}/`
-- `frontend/` — empty `src/{components,hooks,lib,pages}/`
-- No backend or frontend `package.json` yet (deps not installed)
-- No Prisma schema, no migrations, no source files
+- GitHub: github.com/ShubhamRaj16/birthday-planner, branch `feat/phase-1-backend` (all Phase 1 work)
+- Backend fully running on port 3001: `/children`, `/events`, `/tasks`, `/reminders`, `/health`
+- Frontend fully built (Webpack SSR + Redux + styled-components) — pages: Dashboard, Children, Events, EventDetail, Calendar, Reminders, NotFound
+- Jira: SCRUM-6, 7, 9, 11 → Done in SCRUM Sprint 0
+- Confluence: Backend HLD v1.2, Frontend HLD v1.2, Repo Structure v1.2, Phase 1 Retrospective
 
-**Why:** Project was just initialized; all implementation work is ahead.
+**Port map:**
+- 3001 = Backend API
+- 3000 = SSR server (internal)
+- 3002 = Webpack Dev Server (user opens this)
 
-**How to apply:** When asked to build any feature, start from scratch — no existing code to modify. Follow the build order in [[project-overview]]: Phase 1 (core shell) comes first.
+**What's next (Phase 2):**
+- Guest list + RSVP (SCRUM backlog)
+- Expense/budget tracking
+- Gift tracker
+- WhatsApp invite flow (wa.me deep links, card upload)
+- AI suggestions (Claude SDK)
+- Photo gallery
+
+**Why:** Phase 1 scope = core shell only; all feature work deferred to Phase 2+. See [[phase1-lessons]] before starting Phase 2.

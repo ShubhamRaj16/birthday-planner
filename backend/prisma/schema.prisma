@@ -25,7 +25,7 @@ model Child {
 model Event {
   id              Int          @id @default(autoincrement())
   childId         Int          @map("child_id")
-  child           Child        @relation(fields: [childId], references: [id])
+  child           Child        @relation(fields: [childId], references: [id], onDelete: Cascade)
   date            DateTime
   venue           String?
   address         String?
@@ -38,6 +38,9 @@ model Event {
   notes           String?
   tasks           Task[]
   reminders       Reminder[]
+  guests          Guest[]
+  expenses        Expense[]
+  gifts           Gift[]
   createdAt       DateTime     @default(now()) @map("created_at")
   updatedAt       DateTime     @updatedAt @map("updated_at")
 
@@ -71,4 +74,56 @@ model Reminder {
   updatedAt DateTime @updatedAt @map("updated_at")
 
   @@map("reminders")
+}
+
+model Guest {
+  id            Int       @id @default(autoincrement())
+  eventId       Int       @map("event_id")
+  event         Event     @relation(fields: [eventId], references: [id], onDelete: Cascade)
+  name          String
+  phone         String?
+  ageGroup      String?   @map("age_group")      // adult / child
+  dietary       String?
+  rsvp          String    @default("Pending")    // Pending / Confirmed / Declined
+  inviteSent    Boolean   @default(false)        @map("invite_sent")
+  inviteSentAt  DateTime? @map("invite_sent_at")
+  notes         String?
+  createdAt     DateTime  @default(now())        @map("created_at")
+  updatedAt     DateTime  @updatedAt             @map("updated_at")
+
+  @@map("guests")
+}
+
+model Expense {
+  id          Int       @id @default(autoincrement())
+  eventId     Int       @map("event_id")
+  event       Event     @relation(fields: [eventId], references: [id], onDelete: Cascade)
+  label       String
+  amount      Float
+  category    String    // venue / catering / cake / decorations / return gifts / entertainment / photography / invites/printing / miscellaneous
+  paid        Boolean   @default(false)
+  receiptPath String?   @map("receipt_path")
+  date        DateTime  @default(now())
+  notes       String?
+  createdAt   DateTime  @default(now()) @map("created_at")
+  updatedAt   DateTime  @updatedAt      @map("updated_at")
+
+  @@map("expenses")
+}
+
+model Gift {
+  id          Int      @id @default(autoincrement())
+  eventId     Int      @map("event_id")
+  event       Event    @relation(fields: [eventId], references: [id], onDelete: Cascade)
+  name        String
+  description String?
+  price       Float?
+  source      String   @default("manual")   // manual / ai
+  status      String   @default("idea")     // idea / bought / received
+  givenBy     String?  @map("given_by")
+  notes       String?
+  createdAt   DateTime @default(now()) @map("created_at")
+  updatedAt   DateTime @updatedAt      @map("updated_at")
+
+  @@map("gifts")
 }
