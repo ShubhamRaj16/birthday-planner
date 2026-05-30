@@ -10,6 +10,7 @@ import remindersReducer from '../redux/slices/remindersSlice';
 import guestsReducer from '../redux/slices/guestsSlice';
 import expensesReducer from '../redux/slices/expensesSlice';
 import giftsReducer from '../redux/slices/giftsSlice';
+import photosReducer from '../redux/slices/photosSlice';
 import App from '../App';
 import { createClientRoutes } from '../routes/clientRoutes';
 import './index.css';
@@ -25,6 +26,8 @@ const store = configureStore({
     guests: guestsReducer,
     expenses: expensesReducer,
     gifts: giftsReducer,
+    // Also update src/redux/store.js when adding slices here — both must stay in sync
+    photos: photosReducer,
   },
   preloadedState: initialState,
 });

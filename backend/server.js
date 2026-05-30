@@ -38,6 +38,8 @@ const expensesRouter = require('./src/routes/expenses');
 const giftsRouter = require('./src/routes/gifts');
 const eventTasksRouter = require('./src/routes/eventTasks');
 const whatsappRouter = require('./src/routes/whatsapp');
+const photosRouter = require('./src/routes/photos');
+const aiRouter = require('./src/routes/ai');
 app.use('/api/v1/children', childrenRouter);
 app.use('/api/v1/events', eventsRouter);
 app.use('/api/v1/reminders', remindersRouter);
@@ -46,6 +48,8 @@ app.use('/api/v1/events/:eventId/guests', guestsRouter);
 app.use('/api/v1/events/:eventId/expenses', expensesRouter);
 app.use('/api/v1/events/:eventId/gifts', giftsRouter);
 app.use('/api/v1/events/:eventId/tasks', eventTasksRouter);
+app.use('/api/v1/events/:eventId/photos', photosRouter);
+app.use('/api/v1/events/:eventId/ai', aiRouter);
 app.use('/api/v1/whatsapp', whatsappRouter);
 
 app.get('/api/v1/health', (req, res) => {

@@ -6,5 +6,7 @@ backend/prisma/*.db-wal
 backend/prisma/*.db-shm
 backend/uploads/**
 !backend/uploads/**/.gitkeep
+backend/backup/
+backup/
 dist/
 .DS_Store

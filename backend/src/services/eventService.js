@@ -55,6 +55,7 @@ async function updateEvent(id, data) {
       ...(data.cardPath !== undefined && { cardPath: data.cardPath }),
       ...(data.messageTemplate !== undefined && { messageTemplate: data.messageTemplate }),
       ...(data.notes !== undefined && { notes: data.notes }),
+      ...(data.googlePhotosUrl !== undefined && { googlePhotosUrl: data.googlePhotosUrl }),
     },
     include: { tasks: true },
   });

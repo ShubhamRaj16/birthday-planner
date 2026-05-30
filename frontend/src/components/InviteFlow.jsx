@@ -301,7 +301,7 @@ const EmptyMsg = styled.p`
 
 // ─── Component ────────────────────────────────────────────────────────────────
 
-export default function InviteFlow({ eventId, event, onRefresh }) {
+export default function InviteFlow({ eventId, event, onRefresh, suggestedTemplate }) {
   const dispatch = useDispatch();
   const guests = useSelector((state) => state.guests.byEventId[eventId] || []);
 
@@ -355,6 +355,11 @@ export default function InviteFlow({ eventId, event, onRefresh }) {
         .catch(() => {});
     }
   }, [event.messageTemplate, templateLoaded]);
+
+  // Apply AI-generated template when passed from parent
+  useEffect(() => {
+    if (suggestedTemplate) setTemplate(suggestedTemplate);
+  }, [suggestedTemplate]);
 
   // Sync myGateLink when event prop updates
   useEffect(() => {

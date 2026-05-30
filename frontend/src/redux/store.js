@@ -5,6 +5,7 @@ import remindersReducer from './slices/remindersSlice';
 import guestsReducer from './slices/guestsSlice';
 import expensesReducer from './slices/expensesSlice';
 import giftsReducer from './slices/giftsSlice';
+import photosReducer from './slices/photosSlice';
 
 // Factory pattern: create a new store per SSR request to prevent state leaking
 // between concurrent requests. The client reuses a single store instance.
@@ -17,6 +18,7 @@ export function createStore(preloadedState = {}) {
       guests: guestsReducer,
       expenses: expensesReducer,
       gifts: giftsReducer,
+      photos: photosReducer,
     },
     preloadedState,
   });
