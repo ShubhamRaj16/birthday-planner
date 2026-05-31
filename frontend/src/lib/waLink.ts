@@ -1,4 +1,4 @@
-export function normalisePhone(phone) {
+export function normalisePhone(phone: string | null | undefined): string | null {
   if (!phone) return null;
   let p = phone.replace(/[-\s()]/g, '');
   if (p.startsWith('+')) p = p.slice(1);

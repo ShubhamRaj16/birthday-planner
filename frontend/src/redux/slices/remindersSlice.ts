@@ -1,14 +1,18 @@
 import { createSlice, createAsyncThunk } from '@reduxjs/toolkit';
 import apiClient from '../../lib/apiClient';
+import { getApiError } from '../../lib/apiError';
+import type { ApiResponse, Reminder, RemindersState } from '../../types';
+
+type ReminderInput = Partial<Reminder>;
 
 export const fetchReminders = createAsyncThunk(
   'reminders/fetchAll',
   async (_, { rejectWithValue }) => {
     try {
-      const response = await apiClient.get('/reminders');
+      const response = await apiClient.get<ApiResponse<Reminder[]>>('/reminders');
       return response.data.data;
     } catch (error) {
-      return rejectWithValue(error.response?.data?.error || error.message);
+      return rejectWithValue(getApiError(error));
     }
   }
 );
@@ -17,51 +21,51 @@ export const fetchUnreadCount = createAsyncThunk(
   'reminders/fetchUnreadCount',
   async (_, { rejectWithValue }) => {
     try {
-      const response = await apiClient.get('/reminders/unread-count');
+      const response = await apiClient.get<ApiResponse<number | { count: number }>>('/reminders/unread-count');
       return response.data.data;
     } catch (error) {
-      return rejectWithValue(error.response?.data?.error || error.message);
+      return rejectWithValue(getApiError(error));
     }
   }
 );
 
 export const createReminder = createAsyncThunk(
   'reminders/create',
-  async (data, { rejectWithValue }) => {
+  async (data: ReminderInput, { rejectWithValue }) => {
     try {
-      const response = await apiClient.post('/reminders', data);
+      const response = await apiClient.post<ApiResponse<Reminder>>('/reminders', data);
       return response.data.data;
     } catch (error) {
-      return rejectWithValue(error.response?.data?.error || error.message);
+      return rejectWithValue(getApiError(error));
     }
   }
 );
 
 export const deleteReminder = createAsyncThunk(
   'reminders/delete',
-  async (id, { rejectWithValue }) => {
+  async (id: number, { rejectWithValue }) => {
     try {
       await apiClient.delete(`/reminders/${id}`);
       return id;
     } catch (error) {
-      return rejectWithValue(error.response?.data?.error || error.message);
+      return rejectWithValue(getApiError(error));
     }
   }
 );
 
 export const markRead = createAsyncThunk(
   'reminders/markRead',
-  async (ids, { rejectWithValue }) => {
+  async (ids: number[], { rejectWithValue }) => {
     try {
       await apiClient.post('/reminders/mark-read', { ids });
       return ids;
     } catch (error) {
-      return rejectWithValue(error.response?.data?.error || error.message);
+      return rejectWithValue(getApiError(error));
     }
   }
 );
 
-const initialState = {
+const initialState: RemindersState = {
   items: [],
   unreadCount: 0,
   loading: false,
@@ -85,7 +89,7 @@ const remindersSlice = createSlice({
       })
       .addCase(fetchReminders.rejected, (state, action) => {
         state.loading = false;
-        state.error = action.payload;
+        state.error = action.payload as string;
       })
       // fetchUnreadCount
       .addCase(fetchUnreadCount.fulfilled, (state, action) => {
@@ -105,14 +109,14 @@ const remindersSlice = createSlice({
       })
       .addCase(createReminder.rejected, (state, action) => {
         state.loading = false;
-        state.error = action.payload;
+        state.error = action.payload as string;
       })
       // deleteReminder
       .addCase(deleteReminder.fulfilled, (state, action) => {
         state.items = state.items.filter((r) => r.id !== action.payload);
       })
       .addCase(deleteReminder.rejected, (state, action) => {
-        state.error = action.payload;
+        state.error = action.payload as string;
       })
       // markRead — update fired status for affected IDs, decrement unreadCount
       .addCase(markRead.fulfilled, (state, action) => {
@@ -123,7 +127,7 @@ const remindersSlice = createSlice({
         state.unreadCount = Math.max(0, state.unreadCount - ids.size);
       })
       .addCase(markRead.rejected, (state, action) => {
-        state.error = action.payload;
+        state.error = action.payload as string;
       });
   },
 });

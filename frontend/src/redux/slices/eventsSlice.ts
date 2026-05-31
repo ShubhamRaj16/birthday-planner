@@ -1,26 +1,31 @@
 import { createSlice, createAsyncThunk } from '@reduxjs/toolkit';
 import apiClient from '../../lib/apiClient';
+import { getApiError } from '../../lib/apiError';
+import type { ApiResponse, Event, EventsState } from '../../types';
+
+type EventInput = Partial<Event>;
+type UpdateEventArgs = { id: number; data: EventInput };
 
 export const fetchEvents = createAsyncThunk(
   'events/fetchAll',
   async (_, { rejectWithValue }) => {
     try {
-      const response = await apiClient.get('/events');
+      const response = await apiClient.get<ApiResponse<Event[]>>('/events');
       return response.data.data;
     } catch (error) {
-      return rejectWithValue(error.response?.data?.error || error.message);
+      return rejectWithValue(getApiError(error));
     }
   }
 );
 
 export const fetchEvent = createAsyncThunk(
   'events/fetchOne',
-  async (id, { rejectWithValue }) => {
+  async (id: number, { rejectWithValue }) => {
     try {
-      const response = await apiClient.get(`/events/${id}`);
+      const response = await apiClient.get<ApiResponse<Event>>(`/events/${id}`);
       return response.data.data;
     } catch (error) {
-      return rejectWithValue(error.response?.data?.error || error.message);
+      return rejectWithValue(getApiError(error));
     }
   }
 );
@@ -29,63 +34,63 @@ export const fetchUpcoming = createAsyncThunk(
   'events/fetchUpcoming',
   async (_, { rejectWithValue }) => {
     try {
-      const response = await apiClient.get('/events/upcoming');
+      const response = await apiClient.get<ApiResponse<Event[]>>('/events/upcoming');
       return response.data.data;
     } catch (error) {
-      return rejectWithValue(error.response?.data?.error || error.message);
+      return rejectWithValue(getApiError(error));
     }
   }
 );
 
 export const createEvent = createAsyncThunk(
   'events/create',
-  async (data, { rejectWithValue }) => {
+  async (data: EventInput, { rejectWithValue }) => {
     try {
-      const response = await apiClient.post('/events', data);
+      const response = await apiClient.post<ApiResponse<Event>>('/events', data);
       return response.data.data;
     } catch (error) {
-      return rejectWithValue(error.response?.data?.error || error.message);
+      return rejectWithValue(getApiError(error));
     }
   }
 );
 
 export const updateEvent = createAsyncThunk(
   'events/update',
-  async ({ id, data }, { rejectWithValue }) => {
+  async ({ id, data }: UpdateEventArgs, { rejectWithValue }) => {
     try {
-      const response = await apiClient.put(`/events/${id}`, data);
+      const response = await apiClient.put<ApiResponse<Event>>(`/events/${id}`, data);
       return response.data.data;
     } catch (error) {
-      return rejectWithValue(error.response?.data?.error || error.message);
+      return rejectWithValue(getApiError(error));
     }
   }
 );
 
 export const deleteEvent = createAsyncThunk(
   'events/delete',
-  async (id, { rejectWithValue }) => {
+  async (id: number, { rejectWithValue }) => {
     try {
       await apiClient.delete(`/events/${id}`);
       return id;
     } catch (error) {
-      return rejectWithValue(error.response?.data?.error || error.message);
+      return rejectWithValue(getApiError(error));
     }
   }
 );
 
 export const activateEvent = createAsyncThunk(
   'events/activate',
-  async (id, { rejectWithValue }) => {
+  async (id: number, { rejectWithValue }) => {
     try {
-      const response = await apiClient.post(`/events/${id}/activate`);
+      const response = await apiClient.post<ApiResponse<Event>>(`/events/${id}/activate`);
       return response.data.data;
     } catch (error) {
-      return rejectWithValue(error.response?.data?.error || error.message);
+      return rejectWithValue(getApiError(error));
     }
   }
 );
 
-const initialState = {
+const initialState: EventsState = {
   items: [],
   current: null,
   loading: false,
@@ -109,7 +114,7 @@ const eventsSlice = createSlice({
       })
       .addCase(fetchEvents.rejected, (state, action) => {
         state.loading = false;
-        state.error = action.payload;
+        state.error = action.payload as string;
       })
       // fetchEvent
       .addCase(fetchEvent.pending, (state) => {
@@ -122,7 +127,7 @@ const eventsSlice = createSlice({
       })
       .addCase(fetchEvent.rejected, (state, action) => {
         state.loading = false;
-        state.error = action.payload;
+        state.error = action.payload as string;
       })
       // fetchUpcoming — populates items with upcoming events
       .addCase(fetchUpcoming.fulfilled, (state, action) => {
@@ -139,7 +144,7 @@ const eventsSlice = createSlice({
       })
       .addCase(createEvent.rejected, (state, action) => {
         state.loading = false;
-        state.error = action.payload;
+        state.error = action.payload as string;
       })
       // updateEvent
       .addCase(updateEvent.fulfilled, (state, action) => {
@@ -148,7 +153,7 @@ const eventsSlice = createSlice({
         if (state.current?.id === action.payload.id) state.current = action.payload;
       })
       .addCase(updateEvent.rejected, (state, action) => {
-        state.error = action.payload;
+        state.error = action.payload as string;
       })
       // deleteEvent
       .addCase(deleteEvent.fulfilled, (state, action) => {
@@ -156,7 +161,7 @@ const eventsSlice = createSlice({
         if (state.current?.id === action.payload) state.current = null;
       })
       .addCase(deleteEvent.rejected, (state, action) => {
-        state.error = action.payload;
+        state.error = action.payload as string;
       })
       // activateEvent
       .addCase(activateEvent.fulfilled, (state, action) => {
@@ -165,7 +170,7 @@ const eventsSlice = createSlice({
         if (state.current?.id === action.payload.id) state.current = action.payload;
       })
       .addCase(activateEvent.rejected, (state, action) => {
-        state.error = action.payload;
+        state.error = action.payload as string;
       });
   },
 });

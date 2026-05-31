@@ -37,7 +37,7 @@ class AssetManifestPlugin {
 }
 
 module.exports = {
-  entry: './src/client/index.js',
+  entry: './src/client/index.tsx',
   output: {
     filename: 'js/[name].[contenthash:8].js',
     chunkFilename: 'js/[name].[contenthash:8].chunk.js',
@@ -73,7 +73,7 @@ module.exports = {
   module: {
     rules: [
       {
-        test: /\.jsx?$/,
+        test: /\.[jt]sx?$/,
         exclude: /node_modules/,
         use: {
           loader: 'babel-loader',
@@ -86,7 +86,7 @@ module.exports = {
     ],
   },
   resolve: {
-    extensions: ['.js', '.jsx'],
+    extensions: ['.tsx', '.ts', '.js', '.jsx'],
   },
   plugins: [
     new webpack.DefinePlugin({

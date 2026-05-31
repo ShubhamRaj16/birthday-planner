@@ -6,10 +6,13 @@ import guestsReducer from './slices/guestsSlice';
 import expensesReducer from './slices/expensesSlice';
 import giftsReducer from './slices/giftsSlice';
 import photosReducer from './slices/photosSlice';
+import type { RootState } from '../types';
+
+export type PreloadedState = Partial<RootState>;
 
 // Factory pattern: create a new store per SSR request to prevent state leaking
 // between concurrent requests. The client reuses a single store instance.
-export function createStore(preloadedState = {}) {
+export function createStore(preloadedState: PreloadedState = {}) {
   return configureStore({
     reducer: {
       children: childrenReducer,
@@ -23,3 +26,6 @@ export function createStore(preloadedState = {}) {
     preloadedState,
   });
 }
+
+export type AppStore = ReturnType<typeof createStore>;
+export type AppDispatch = AppStore['dispatch'];

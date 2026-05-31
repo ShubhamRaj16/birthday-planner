@@ -1,58 +1,63 @@
 import { createSlice, createAsyncThunk } from '@reduxjs/toolkit';
 import apiClient from '../../lib/apiClient';
+import { getApiError } from '../../lib/apiError';
+import type { ApiResponse, Child, ChildrenState } from '../../types';
+
+type UpdateChildArgs = { id: number; data: Partial<Child> };
 
 export const fetchChildren = createAsyncThunk(
   'children/fetchAll',
   async (_, { rejectWithValue }) => {
     try {
-      const response = await apiClient.get('/children');
+      const response = await apiClient.get<ApiResponse<Child[]>>('/children');
       return response.data.data;
     } catch (error) {
-      return rejectWithValue(error.response?.data?.error || error.message);
+      return rejectWithValue(getApiError(error));
     }
   }
 );
 
 export const createChild = createAsyncThunk(
   'children/create',
-  async (formData, { rejectWithValue }) => {
+  async (formData: FormData, { rejectWithValue }) => {
     try {
-      const response = await apiClient.post('/children', formData, {
+      const response = await apiClient.post<ApiResponse<Child>>('/children', formData, {
         headers: { 'Content-Type': 'multipart/form-data' },
       });
       return response.data.data;
     } catch (error) {
-      return rejectWithValue(error.response?.data?.error || error.message);
+      return rejectWithValue(getApiError(error));
     }
   }
 );
 
 export const updateChild = createAsyncThunk(
   'children/update',
-  async ({ id, data }, { rejectWithValue }) => {
+  async ({ id, data }: UpdateChildArgs, { rejectWithValue }) => {
     try {
-      const response = await apiClient.put(`/children/${id}`, data);
+      const response = await apiClient.put<ApiResponse<Child>>(`/children/${id}`, data);
       return response.data.data;
     } catch (error) {
-      return rejectWithValue(error.response?.data?.error || error.message);
+      return rejectWithValue(getApiError(error));
     }
   }
 );
 
 export const deleteChild = createAsyncThunk(
   'children/delete',
-  async (id, { rejectWithValue }) => {
+  async (id: number, { rejectWithValue }) => {
     try {
       await apiClient.delete(`/children/${id}`);
       return id;
     } catch (error) {
-      return rejectWithValue(error.response?.data?.error || error.message);
+      return rejectWithValue(getApiError(error));
     }
   }
 );
 
-const initialState = {
+const initialState: ChildrenState = {
   items: [],
+  current: null,
   loading: false,
   error: null,
 };
@@ -74,7 +79,7 @@ const childrenSlice = createSlice({
       })
       .addCase(fetchChildren.rejected, (state, action) => {
         state.loading = false;
-        state.error = action.payload;
+        state.error = action.payload as string;
       })
       // createChild
       .addCase(createChild.pending, (state) => {
@@ -87,7 +92,7 @@ const childrenSlice = createSlice({
       })
       .addCase(createChild.rejected, (state, action) => {
         state.loading = false;
-        state.error = action.payload;
+        state.error = action.payload as string;
       })
       // updateChild
       .addCase(updateChild.fulfilled, (state, action) => {
@@ -95,14 +100,14 @@ const childrenSlice = createSlice({
         if (idx !== -1) state.items[idx] = action.payload;
       })
       .addCase(updateChild.rejected, (state, action) => {
-        state.error = action.payload;
+        state.error = action.payload as string;
       })
       // deleteChild
       .addCase(deleteChild.fulfilled, (state, action) => {
         state.items = state.items.filter((c) => c.id !== action.payload);
       })
       .addCase(deleteChild.rejected, (state, action) => {
-        state.error = action.payload;
+        state.error = action.payload as string;
       });
   },
 });

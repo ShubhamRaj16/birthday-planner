@@ -1,6 +1,6 @@
 import axios from 'axios';
 
-function getApiBaseUrl() {
+function getApiBaseUrl(): string {
   // Server-side (SSR): window is not defined
   if (typeof window === 'undefined') {
     return process.env.REACT_APP_API_URL || 'http://localhost:3001/api/v1';
@@ -11,7 +11,7 @@ function getApiBaseUrl() {
 
 // Safe media URL builder — works in both SSR (window undefined) and browser.
 // Use this for any /uploads/* paths rather than accessing window directly.
-export function mediaUrl(storagePath) {
+export function mediaUrl(storagePath: string): string {
   const host = typeof window !== 'undefined' ? window.location.hostname : 'localhost';
   return `http://${host}:3001${storagePath}`;
 }

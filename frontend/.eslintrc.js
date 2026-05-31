@@ -10,6 +10,7 @@ module.exports = {
     'plugin:react-hooks/recommended',
     'prettier',
   ],
+  plugins: ['@typescript-eslint'],
   parserOptions: {
     ecmaVersion: 'latest',
     sourceType: 'module',
@@ -53,6 +54,22 @@ module.exports = {
     'no-shadow': ['warn', { allow: ['err', 'error', 'resolve', 'reject'] }],
   },
   overrides: [
+    {
+      files: ['src/**/*.{ts,tsx}'],
+      parser: '@typescript-eslint/parser',
+      parserOptions: {
+        ecmaVersion: 'latest',
+        sourceType: 'module',
+        ecmaFeatures: { jsx: true },
+      },
+      rules: {
+        'no-unused-vars': 'off',
+        '@typescript-eslint/no-unused-vars': [
+          'error',
+          { argsIgnorePattern: '^_', varsIgnorePattern: '^_', caughtErrorsIgnorePattern: '^_' },
+        ],
+      },
+    },
     {
       // Webpack config and scripts are CJS
       files: ['config/**/*.js', 'scripts/**/*.js'],

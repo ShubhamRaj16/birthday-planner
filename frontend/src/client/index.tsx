@@ -4,6 +4,7 @@ import { Provider } from 'react-redux';
 import { BrowserRouter } from 'react-router-dom';
 import { createStore, type PreloadedState } from '../redux/store';
 import App from '../App';
+import { createClientRoutes } from '../routes/clientRoutes';
 import './errorHandler';
 
 // Hydrate the SSR-rendered markup. Initial Redux state is injected by the server
@@ -12,15 +13,21 @@ const preloadedState: PreloadedState = window.__INITIAL_STATE__ ?? {};
 const store = createStore(preloadedState);
 
 const rootEl = document.getElementById('root');
-if (rootEl) {
+async function hydrateApp(): Promise<void> {
+  if (!rootEl) return;
+
+  const routes = await createClientRoutes();
+
   hydrateRoot(
     rootEl,
     <React.StrictMode>
       <Provider store={store}>
         <BrowserRouter>
-          <App />
+          <App routes={routes} />
         </BrowserRouter>
       </Provider>
     </React.StrictMode>,
   );
 }
+
+void hydrateApp();
