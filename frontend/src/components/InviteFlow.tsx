@@ -1,10 +1,19 @@
-import { useEffect, useState } from 'react';
-import { useDispatch, useSelector } from 'react-redux';
+import { useEffect, useState, type ChangeEvent } from 'react';
+import { useAppDispatch, useAppSelector } from '../redux/hooks';
 import styled from 'styled-components';
 import dayjs from 'dayjs';
 import apiClient, { mediaUrl } from '../lib/apiClient';
+import { getApiError } from '../lib/apiError';
 import { updateEvent } from '../redux/slices/eventsSlice';
 import { fetchGuests } from '../redux/slices/guestsSlice';
+import type { Event, RsvpStatus } from '../types';
+
+interface InviteFlowProps {
+  eventId: number;
+  event: Event;
+  onRefresh?: () => void;
+  suggestedTemplate?: string;
+}
 
 // ─── Styled components ────────────────────────────────────────────────────────
 
@@ -60,7 +69,7 @@ const FileInput = styled.input`
   display: block;
 `;
 
-const UploadStatus = styled.span`
+const UploadStatus = styled.span<{ $success?: boolean }>`
   font-size: 0.82rem;
   color: ${({ $success }) => ($success ? '#065f46' : '#6b7280')};
   margin-left: 0.5rem;
@@ -248,7 +257,7 @@ const Td = styled.td`
   color: #111827;
 `;
 
-const RsvpBadge = styled.span`
+const RsvpBadge = styled.span<{ rsvp: RsvpStatus }>`
   font-size: 0.72rem;
   font-weight: 600;
   padding: 2px 9px;
@@ -261,7 +270,7 @@ const RsvpBadge = styled.span`
     rsvp === 'Declined'  ? '#991b1b' : '#92400e'};
 `;
 
-const SentBadge = styled.span`
+const SentBadge = styled.span<{ $sent: boolean }>`
   font-size: 0.72rem;
   font-weight: 600;
   padding: 2px 9px;
@@ -301,9 +310,9 @@ const EmptyMsg = styled.p`
 
 // ─── Component ────────────────────────────────────────────────────────────────
 
-export default function InviteFlow({ eventId, event, onRefresh, suggestedTemplate }) {
-  const dispatch = useDispatch();
-  const guests = useSelector((state) => state.guests.byEventId[eventId] || []);
+export default function InviteFlow({ eventId, event, onRefresh, suggestedTemplate }: InviteFlowProps) {
+  const dispatch = useAppDispatch();
+  const guests = useAppSelector((state) => state.guests.byEventId[eventId] || []);
 
   // ── Section A: Card upload ────────────────────────────────────────────────
   const [uploadStatus, setUploadStatus] = useState('');  // '' | 'uploading' | 'done' | 'error'
@@ -330,7 +339,7 @@ export default function InviteFlow({ eventId, event, onRefresh, suggestedTemplat
   // ── Section C: Send queue ─────────────────────────────────────────────────
   const [onlyUnsent, setOnlyUnsent] = useState(true);
   const [includeResend, setIncludeResend] = useState(false);
-  const [selected, setSelected] = useState({});
+  const [selected, setSelected] = useState<Record<number, boolean>>({});
   const [sending, setSending] = useState(false);
   const [sendProgress, setSendProgress] = useState('');
   const [showCardNote, setShowCardNote] = useState(false);
@@ -372,7 +381,7 @@ export default function InviteFlow({ eventId, event, onRefresh, suggestedTemplat
 
   // ── Section A: Card upload ────────────────────────────────────────────────
 
-  async function handleFileChange(e) {
+  async function handleFileChange(e: ChangeEvent<HTMLInputElement>) {
     const file = e.target.files?.[0];
     if (!file) return;
     if (file.size > 10 * 1024 * 1024) {
@@ -392,13 +401,13 @@ export default function InviteFlow({ eventId, event, onRefresh, suggestedTemplat
       if (onRefresh) onRefresh();
     } catch (err) {
       setUploadStatus('error');
-      setUploadError(err.response?.data?.error || 'Upload failed.');
+      setUploadError(getApiError(err) || 'Upload failed.');
     }
   }
 
   // ── Section A: MyGate link save ───────────────────────────────────────────
 
-  function validateMyGateLink(val) {
+  function validateMyGateLink(val: string) {
     if (!val) return '';
     if (!val.startsWith('http://') && !val.startsWith('https://')) {
       return 'URL must start with http:// or https://';
@@ -418,7 +427,7 @@ export default function InviteFlow({ eventId, event, onRefresh, suggestedTemplat
       setMyGateSaved(true);
       setTimeout(() => setMyGateSaved(false), 3000);
     } catch (err) {
-      setMyGateError(err || 'Failed to save MyGate link.');
+      setMyGateError(String(err || 'Failed to save MyGate link.'));
     } finally {
       setMyGateSaving(false);
     }
@@ -443,7 +452,7 @@ export default function InviteFlow({ eventId, event, onRefresh, suggestedTemplat
       const res = await apiClient.post('/whatsapp/preview', { eventId, template });
       setPreviewMsg(res.data?.data?.message || '');
     } catch (err) {
-      setPreviewError(err.response?.data?.error || 'Preview failed.');
+      setPreviewError(getApiError(err) || 'Preview failed.');
     } finally {
       setPreviewLoading(false);
     }
@@ -458,7 +467,7 @@ export default function InviteFlow({ eventId, event, onRefresh, suggestedTemplat
       setTemplateSaved(true);
       setTimeout(() => setTemplateSaved(false), 3000);
     } catch (err) {
-      setTemplateSaveError(err || 'Failed to save template.');
+      setTemplateSaveError(String(err || 'Failed to save template.'));
     } finally {
       setTemplateSaving(false);
     }
@@ -472,7 +481,7 @@ export default function InviteFlow({ eventId, event, onRefresh, suggestedTemplat
     return true;
   });
 
-  function toggleSelect(guestId) {
+  function toggleSelect(guestId: number) {
     setSelected((prev) => ({ ...prev, [guestId]: !prev[guestId] }));
   }
 
@@ -510,7 +519,7 @@ export default function InviteFlow({ eventId, event, onRefresh, suggestedTemplat
         // Re-fetch guests after each send so inviteSent badge updates
         await dispatch(fetchGuests(eventId));
       } catch (err) {
-        setSendError(`Failed to send to ${guest.name}: ${err.response?.data?.error || err.message}`);
+      setSendError(`Failed to send to ${guest.name}: ${getApiError(err)}`);
       }
     }
 

@@ -3,6 +3,16 @@ import styled from 'styled-components';
 import Header from './components/Header';
 import Footer from './components/Footer';
 import ErrorBoundary from './components/ErrorBoundary';
+import type { ComponentType } from 'react';
+
+export interface AppRoute {
+  path: string;
+  element: ComponentType;
+}
+
+interface AppProps {
+  routes: AppRoute[];
+}
 
 const AppWrapper = styled.div`
   display: flex;
@@ -20,7 +30,7 @@ const Main = styled.main`
   box-sizing: border-box;
 `;
 
-export default function App({ routes }) {
+export default function App({ routes }: AppProps) {
   return (
     <AppWrapper>
       <Header />

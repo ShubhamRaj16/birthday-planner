@@ -13,15 +13,8 @@
     "resolveJsonModule": true,
     "forceConsistentCasingInFileNames": true,
     "noEmit": true,
-    "types": ["node"]
+    "types": ["node", "vitest/globals", "@testing-library/jest-dom"]
   },
-  "//": "Phased migration: strict typecheck covers the data layer (types, lib, redux). UI (.jsx pages/components) compiles via Babel and migrates to .tsx in a later phase.",
-  "include": [
-    "src/types.ts",
-    "src/global.d.ts",
-    "src/lib/**/*.ts",
-    "src/redux/**/*.ts",
-    "src/client/**/*.tsx"
-  ],
+  "include": ["src/**/*.ts", "src/**/*.tsx"],
   "exclude": ["node_modules", "dist"]
 }

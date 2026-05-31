@@ -1,8 +1,9 @@
-import { useEffect, useState } from 'react';
-import { useDispatch, useSelector } from 'react-redux';
+import { useEffect, useState, type ChangeEvent, type FormEvent, type MouseEvent } from 'react';
+import { useAppDispatch, useAppSelector } from '../redux/hooks';
 import { useNavigate } from 'react-router-dom';
 import styled from 'styled-components';
 import dayjs from 'dayjs';
+import type { EventStatus } from '../types';
 import { fetchEvents, createEvent, deleteEvent } from '../redux/slices/eventsSlice';
 import { fetchChildren } from '../redux/slices/childrenSlice';
 
@@ -175,7 +176,7 @@ const EventRight = styled.div`
   gap: 0.5rem;
 `;
 
-const StatusBadge = styled.span`
+const StatusBadge = styled.span<{ status: EventStatus }>`
   font-size: 0.72rem;
   font-weight: 600;
   padding: 2px 8px;
@@ -204,10 +205,10 @@ const EMPTY_FORM = {
 };
 
 export default function Events() {
-  const dispatch = useDispatch();
+  const dispatch = useAppDispatch();
   const navigate = useNavigate();
-  const { items: events, loading, error } = useSelector((state) => state.events);
-  const { items: children } = useSelector((state) => state.children);
+  const { items: events, loading, error } = useAppSelector((state) => state.events);
+  const { items: children } = useAppSelector((state) => state.children);
   const [showForm, setShowForm] = useState(false);
   const [form, setForm] = useState(EMPTY_FORM);
 
@@ -216,12 +217,12 @@ export default function Events() {
     dispatch(fetchChildren());
   }, [dispatch]);
 
-  function handleChange(e) {
+  function handleChange(e: ChangeEvent<HTMLInputElement | HTMLSelectElement>) {
     const { name, value } = e.target;
     setForm((f) => ({ ...f, [name]: value }));
   }
 
-  function handleSubmit(e) {
+  function handleSubmit(e: FormEvent<HTMLFormElement>) {
     e.preventDefault();
     const data = {
       childId: Number(form.childId),
@@ -231,21 +232,21 @@ export default function Events() {
       budget: form.budget ? Number(form.budget) : undefined,
     };
     dispatch(createEvent(data)).then((action) => {
-      if (!action.error) {
+      if (createEvent.fulfilled.match(action)) {
         setShowForm(false);
         setForm(EMPTY_FORM);
       }
     });
   }
 
-  function handleDelete(e, id) {
+  function handleDelete(e: MouseEvent<HTMLButtonElement>, id: number) {
     e.stopPropagation();
     if (window.confirm('Delete this event and all its data?')) {
       dispatch(deleteEvent(id));
     }
   }
 
-  const sorted = [...events].sort((a, b) => new Date(a.date) - new Date(b.date));
+  const sorted = [...events].sort((a, b) => new Date(a.date).getTime() - new Date(b.date).getTime());
 
   return (
     <div>

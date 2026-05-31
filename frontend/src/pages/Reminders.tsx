@@ -1,5 +1,5 @@
-import { useEffect, useState } from 'react';
-import { useDispatch, useSelector } from 'react-redux';
+import { useEffect, useState, type ChangeEvent, type FormEvent } from 'react';
+import { useAppDispatch, useAppSelector } from '../redux/hooks';
 import styled from 'styled-components';
 import dayjs from 'dayjs';
 import {
@@ -155,7 +155,7 @@ const ErrorMsg = styled.p`
   margin-bottom: 0.75rem;
 `;
 
-const ReminderCard = styled.div`
+const ReminderCard = styled.div<{ $fired: boolean }>`
   background: #fff;
   border: 1px solid ${({ $fired }) => ($fired ? '#d1fae5' : '#e5e7eb')};
   border-radius: 8px;
@@ -230,9 +230,9 @@ const EMPTY_FORM = {
 };
 
 export default function Reminders() {
-  const dispatch = useDispatch();
-  const { items: reminders, loading, error } = useSelector((state) => state.reminders);
-  const { items: events } = useSelector((state) => state.events);
+  const dispatch = useAppDispatch();
+  const { items: reminders, loading, error } = useAppSelector((state) => state.reminders);
+  const { items: events } = useAppSelector((state) => state.events);
   const [showForm, setShowForm] = useState(false);
   const [form, setForm] = useState(EMPTY_FORM);
 
@@ -241,12 +241,12 @@ export default function Reminders() {
     dispatch(fetchEvents());
   }, [dispatch]);
 
-  function handleChange(e) {
+  function handleChange(e: ChangeEvent<HTMLInputElement | HTMLSelectElement>) {
     const { name, value } = e.target;
     setForm((f) => ({ ...f, [name]: value }));
   }
 
-  function handleSubmit(e) {
+  function handleSubmit(e: FormEvent<HTMLFormElement>) {
     e.preventDefault();
     const data = {
       eventId: form.eventId ? Number(form.eventId) : undefined,
@@ -255,25 +255,25 @@ export default function Reminders() {
       type: form.type,
     };
     dispatch(createReminder(data)).then((action) => {
-      if (!action.error) {
+      if (createReminder.fulfilled.match(action)) {
         setShowForm(false);
         setForm(EMPTY_FORM);
       }
     });
   }
 
-  function handleDelete(id) {
+  function handleDelete(id: number) {
     if (window.confirm('Delete this reminder?')) {
       dispatch(deleteReminder(id));
     }
   }
 
-  function handleMarkRead(id) {
+  function handleMarkRead(id: number) {
     dispatch(markRead([id]));
   }
 
   const sorted = [...reminders].sort(
-    (a, b) => new Date(a.triggerAt) - new Date(b.triggerAt)
+    (a, b) => new Date(a.triggerAt).getTime() - new Date(b.triggerAt).getTime()
   );
 
   return (

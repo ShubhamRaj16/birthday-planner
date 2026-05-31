@@ -1,8 +1,12 @@
-import { useEffect, useRef, useState } from 'react';
-import { useDispatch, useSelector } from 'react-redux';
+import { useEffect, useRef, useState, type ChangeEvent } from 'react';
+import { useAppDispatch, useAppSelector } from '../redux/hooks';
 import styled from 'styled-components';
 import { fetchPhotos, uploadPhoto, updatePhoto, deletePhoto } from '../redux/slices/photosSlice';
 import { mediaUrl } from '../lib/apiClient';
+
+interface PhotoGalleryProps {
+  eventId: number;
+}
 
 // ─── Styled components ────────────────────────────────────────────────────────
 
@@ -61,7 +65,7 @@ const Grid = styled.div`
   gap: 0.75rem;
 `;
 
-const PhotoCard = styled.div`
+const PhotoCard = styled.div<{ $isCover: boolean }>`
   border: 2px solid ${({ $isCover }) => ($isCover ? '#7c3aed' : '#e5e7eb')};
   border-radius: 8px;
   overflow: hidden;
@@ -93,7 +97,7 @@ const ActionRow = styled.div`
   flex-wrap: wrap;
 `;
 
-const SmallBtn = styled.button`
+const SmallBtn = styled.button<{ $variant?: 'danger' }>`
   font-size: 0.72rem;
   padding: 2px 8px;
   border-radius: 5px;
@@ -134,23 +138,23 @@ const ErrMsg = styled.p`
 
 // ─── Component ────────────────────────────────────────────────────────────────
 
-export default function PhotoGallery({ eventId }) {
-  const dispatch = useDispatch();
-  const photos = useSelector((s) => s.photos.byEventId[eventId] || []);
-  const loading = useSelector((s) => s.photos.loading);
+export default function PhotoGallery({ eventId }: PhotoGalleryProps) {
+  const dispatch = useAppDispatch();
+  const photos = useAppSelector((s) => s.photos.byEventId[eventId] || []);
+  const loading = useAppSelector((s) => s.photos.loading);
 
-  const [selectedFile, setSelectedFile] = useState(null);
+  const [selectedFile, setSelectedFile] = useState<File | null>(null);
   const [caption, setCaption] = useState('');
   const [uploading, setUploading] = useState(false);
-  const [err, setErr] = useState(null);
-  const fileRef = useRef();
+  const [err, setErr] = useState<string | null>(null);
+  const fileRef = useRef<HTMLInputElement | null>(null);
 
   useEffect(() => {
     dispatch(fetchPhotos(eventId));
   }, [dispatch, eventId]);
 
-  function handleFileChange(e) {
-    const file = e.target.files[0];
+  function handleFileChange(e: ChangeEvent<HTMLInputElement>) {
+    const file = e.target.files?.[0];
     if (file) { setSelectedFile(file); setErr(null); }
   }
 
@@ -167,22 +171,22 @@ export default function PhotoGallery({ eventId }) {
       setCaption('');
       if (fileRef.current) fileRef.current.value = '';
     } catch (e) {
-      setErr(e.message || 'Upload failed');
+      setErr(e instanceof Error ? e.message : 'Upload failed');
     } finally {
       setUploading(false);
     }
   }
 
-  async function handleSetCover(photoId) {
+  async function handleSetCover(photoId: number) {
     await dispatch(updatePhoto({ eventId, photoId, data: { isCover: true } }));
   }
 
-  async function handleDelete(photoId) {
+  async function handleDelete(photoId: number) {
     if (!window.confirm('Delete this photo?')) return;
     await dispatch(deletePhoto({ eventId, photoId }));
   }
 
-  function getPhotoUrl(storagePath) {
+  function getPhotoUrl(storagePath: string) {
     return mediaUrl(storagePath);
   }
 

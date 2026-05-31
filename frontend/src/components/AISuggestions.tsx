@@ -1,10 +1,16 @@
 import { useState } from 'react';
 import styled from 'styled-components';
 import apiClient from '../lib/apiClient';
+import { getApiError } from '../lib/apiError';
 
 // Inline thunk for saving a gift suggestion — reuses the gifts API
-async function saveGiftSuggestion(eventId, name) {
+async function saveGiftSuggestion(eventId: number, name: string): Promise<void> {
   await apiClient.post(`/events/${eventId}/gifts`, { name, source: 'ai' });
+}
+
+interface AISuggestionsProps {
+  eventId: number;
+  onUseTemplate?: (template: string) => void;
 }
 
 // ─── Styled components ────────────────────────────────────────────────────────
@@ -16,7 +22,7 @@ const TypeGrid = styled.div`
   margin-bottom: 1.25rem;
 `;
 
-const TypeBtn = styled.button`
+const TypeBtn = styled.button<{ $active: boolean }>`
   padding: 0.45rem 1rem;
   border-radius: 999px;
   font-size: 0.875rem;
@@ -127,12 +133,12 @@ const TYPES = [
 
 // ─── Component ────────────────────────────────────────────────────────────────
 
-export default function AISuggestions({ eventId, onUseTemplate }) {
+export default function AISuggestions({ eventId, onUseTemplate }: AISuggestionsProps) {
   const [activeType, setActiveType] = useState('themes');
-  const [suggestions, setSuggestions] = useState([]);
+  const [suggestions, setSuggestions] = useState<string[]>([]);
   const [loading, setLoading] = useState(false);
-  const [err, setErr] = useState(null);
-  const [savedGifts, setSavedGifts] = useState({});
+  const [err, setErr] = useState<string | null>(null);
+  const [savedGifts, setSavedGifts] = useState<Record<string, boolean>>({});
 
   async function handleGenerate() {
     setLoading(true);
@@ -142,13 +148,13 @@ export default function AISuggestions({ eventId, onUseTemplate }) {
       const res = await apiClient.post(`/events/${eventId}/ai/suggest`, { type: activeType });
       setSuggestions(res.data.data.suggestions || []);
     } catch (e) {
-      setErr(e.response?.data?.error || e.message || 'AI request failed');
+      setErr(getApiError(e) || 'AI request failed');
     } finally {
       setLoading(false);
     }
   }
 
-  async function handleSaveGift(suggestion) {
+  async function handleSaveGift(suggestion: string) {
     setSavedGifts((prev) => ({ ...prev, [suggestion]: true }));
     try {
       await saveGiftSuggestion(eventId, suggestion);

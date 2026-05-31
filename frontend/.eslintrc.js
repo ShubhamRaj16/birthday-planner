@@ -80,7 +80,7 @@ module.exports = {
     },
     {
       // Test files can use describe/it/expect globals and relax some rules
-      files: ['src/**/*.test.{js,jsx}', 'src/test/**/*.js'],
+      files: ['src/**/*.test.{js,ts,tsx}', 'src/test/**/*.{js,ts,tsx}'],
       env: { node: true },
       rules: {
         'no-console': 'off',
@@ -96,7 +96,7 @@ module.exports = {
     },
     {
       // Vitest test files — globals provided by vitest runtime
-      files: ['src/test/**/*.{js,jsx}', 'src/tests/**/*.{js,jsx}'],
+      files: ['src/test/**/*.{js,ts,tsx}', 'src/tests/**/*.{js,ts,tsx}'],
       globals: {
         vi: 'readonly',
         describe: 'readonly',

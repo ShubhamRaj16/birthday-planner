@@ -1,7 +1,18 @@
-import { useState } from 'react';
+import { useState, type FormEvent } from 'react';
 import styled from 'styled-components';
 import dayjs from 'dayjs';
 import apiClient from '../lib/apiClient';
+import { getApiError } from '../lib/apiError';
+import type { Task } from '../types';
+
+export type TaskChecklistTask = Pick<Task, 'id' | 'title' | 'done' | 'dueDate' | 'category'> &
+  Partial<Omit<Task, 'id' | 'title' | 'done' | 'dueDate' | 'category'>>;
+
+interface TaskChecklistProps {
+  eventId: number;
+  tasks?: TaskChecklistTask[];
+  onRefresh?: () => void;
+}
 
 // ─── Styled components ────────────────────────────────────────────────────────
 
@@ -33,7 +44,7 @@ const ProgressBar = styled.div`
   overflow: hidden;
 `;
 
-const ProgressFill = styled.div`
+const ProgressFill = styled.div<{ $pct: number }>`
   height: 100%;
   background: #7c3aed;
   border-radius: 999px;
@@ -72,7 +83,7 @@ const TaskInfo = styled.div`
   min-width: 0;
 `;
 
-const TaskTitle = styled.span`
+const TaskTitle = styled.span<{ $done: boolean; $overdue: boolean | '' | null }>`
   font-size: 0.875rem;
   color: ${({ $done, $overdue }) => $done ? '#9ca3af' : $overdue ? '#dc2626' : '#111827'};
   text-decoration: ${({ $done }) => $done ? 'line-through' : 'none'};
@@ -97,7 +108,7 @@ const CategoryChip = styled.span`
   text-transform: capitalize;
 `;
 
-const DueDateLabel = styled.span`
+const DueDateLabel = styled.span<{ $overdue: boolean | '' | null }>`
   font-size: 0.72rem;
   color: ${({ $overdue }) => $overdue ? '#dc2626' : '#9ca3af'};
   font-weight: ${({ $overdue }) => $overdue ? '600' : '400'};
@@ -232,7 +243,7 @@ const TODAY = dayjs().startOf('day');
 
 // ─── Component ────────────────────────────────────────────────────────────────
 
-export default function TaskChecklist({ eventId, tasks = [], onRefresh }) {
+export default function TaskChecklist({ eventId, tasks = [], onRefresh }: TaskChecklistProps) {
   const [addOpen, setAddOpen] = useState(false);
   const [form, setForm] = useState({ title: '', category: 'miscellaneous', dueDate: '' });
   const [formError, setFormError] = useState('');
@@ -252,36 +263,36 @@ export default function TaskChecklist({ eventId, tasks = [], onRefresh }) {
   const total = tasks.length;
   const pct = total > 0 ? Math.round((doneCount / total) * 100) : 0;
 
-  function isOverdue(task) {
+  function isOverdue(task: TaskChecklistTask) {
     return !task.done && task.dueDate && dayjs(task.dueDate).isBefore(TODAY);
   }
 
   // SCRUM-41: surface operation errors to the user (auto-clears after 5s)
-  function showOpError(msg) {
+  function showOpError(msg: string) {
     setOpError(msg);
     setTimeout(() => setOpError(''), 5000);
   }
 
-  async function handleToggle(task) {
+  async function handleToggle(task: TaskChecklistTask) {
     try {
       await apiClient.put(`/tasks/${task.id}`, { done: !task.done });
       onRefresh && onRefresh();
     } catch (err) {
-      showOpError(err.response?.data?.error?.message || 'Failed to update task.');
+      showOpError(getApiError(err) || 'Failed to update task.');
     }
   }
 
-  async function handleDelete(taskId) {
+  async function handleDelete(taskId: number) {
     if (!window.confirm('Delete this task?')) return;
     try {
       await apiClient.delete(`/events/${eventId}/tasks/${taskId}`);
       onRefresh && onRefresh();
     } catch (err) {
-      showOpError(err.response?.data?.error?.message || 'Failed to delete task.');
+      showOpError(getApiError(err) || 'Failed to delete task.');
     }
   }
 
-  async function handleAddTask(e) {
+  async function handleAddTask(e: FormEvent<HTMLFormElement>) {
     e.preventDefault();
     if (!form.title.trim()) { setFormError('Title is required.'); return; }
     setFormError('');
@@ -296,7 +307,7 @@ export default function TaskChecklist({ eventId, tasks = [], onRefresh }) {
       setAddOpen(false);
       onRefresh && onRefresh();
     } catch (err) {
-      setFormError(err.response?.data?.error || err.message || 'Failed to add task.');
+      setFormError(getApiError(err) || 'Failed to add task.');
     } finally {
       setAdding(false);
     }
@@ -309,7 +320,7 @@ export default function TaskChecklist({ eventId, tasks = [], onRefresh }) {
       await apiClient.post(`/events/${eventId}/tasks/reset-defaults`);
       onRefresh && onRefresh();
     } catch (err) {
-      console.error('Reset defaults failed:', err.message);
+      console.error('Reset defaults failed:', getApiError(err));
     } finally {
       setResetting(false);
     }

@@ -32,6 +32,7 @@ export interface Event {
   googlePhotosUrl: string | null;
   tasks?: Task[];
   reminders?: Reminder[];
+  photos?: Photo[];
   createdAt: string;
   updatedAt: string;
 }
@@ -100,6 +101,7 @@ export interface Reminder {
   eventId: number | null;
   triggerAt: string;
   fired: boolean;
+  read?: boolean;
   label: string;
   type: string;
   createdAt: string;

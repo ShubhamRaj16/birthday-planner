@@ -1,5 +1,5 @@
 import { useEffect } from 'react';
-import { useSelector, useDispatch } from 'react-redux';
+import { useAppDispatch, useAppSelector } from '../redux/hooks';
 import { Link, useLocation } from 'react-router-dom';
 import styled from 'styled-components';
 import { fetchUnreadCount } from '../redux/slices/remindersSlice';
@@ -28,7 +28,7 @@ const Brand = styled(Link)`
   }
 `;
 
-const NavLink = styled(Link)`
+const NavLink = styled(Link)<{ $active: boolean }>`
   color: ${({ $active }) => ($active ? '#e9d5ff' : 'rgba(255,255,255,0.8)')};
   text-decoration: none;
   padding: 0.4rem 0.75rem;
@@ -65,8 +65,8 @@ const Badge = styled.span`
 
 export default function Header() {
   const location = useLocation();
-  const dispatch = useDispatch();
-  const unreadCount = useSelector((state) => state.reminders.unreadCount);
+  const dispatch = useAppDispatch();
+  const unreadCount = useAppSelector((state) => state.reminders.unreadCount);
 
   // SCRUM-37: poll unread reminder count every 60s (matches backend cron) + on navigation
   useEffect(() => {
@@ -75,7 +75,7 @@ export default function Header() {
     return () => clearInterval(timer);
   }, [dispatch, location.pathname]);
 
-  const isActive = (path) => {
+  const isActive = (path: string) => {
     if (path === '/') return location.pathname === '/';
     return location.pathname.startsWith(path);
   };

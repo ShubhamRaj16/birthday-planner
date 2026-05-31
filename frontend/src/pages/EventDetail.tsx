@@ -1,8 +1,9 @@
 import { useEffect, useState } from 'react';
 import { useParams, Link } from 'react-router-dom';
-import { useDispatch, useSelector } from 'react-redux';
+import { useAppDispatch, useAppSelector } from '../redux/hooks';
 import styled from 'styled-components';
 import dayjs from 'dayjs';
+import type { Event as PlannerEvent, EventStatus } from '../types';
 import { fetchEvent, activateEvent, updateEvent } from '../redux/slices/eventsSlice';
 import GuestList from '../components/GuestList';
 import BudgetTracker from '../components/BudgetTracker';
@@ -65,7 +66,7 @@ const MetaItem = styled.span`
   color: #6b7280;
 `;
 
-const StatusBadge = styled.span`
+const StatusBadge = styled.span<{ status: EventStatus }>`
   font-size: 0.78rem;
   font-weight: 600;
   padding: 3px 10px;
@@ -133,7 +134,7 @@ const TabBar = styled.div`
   overflow-x: auto;
 `;
 
-const TabButton = styled.button`
+const TabButton = styled.button<{ $active: boolean }>`
   background: none;
   border: none;
   padding: 0.6rem 1.25rem;
@@ -239,8 +240,8 @@ const GPLink = styled.a`
   &:hover { text-decoration: underline; }
 `;
 
-function GooglePhotosField({ eventId, event }) {
-  const dispatch = useDispatch();
+function GooglePhotosField({ eventId, event }: { eventId: number; event: PlannerEvent }) {
+  const dispatch = useAppDispatch();
   const [url, setUrl] = useState(event.googlePhotosUrl || '');
   const [saved, setSaved] = useState(false);
 
@@ -302,30 +303,31 @@ const TABS = [
 
 export default function EventDetail() {
   const { id } = useParams();
-  const dispatch = useDispatch();
-  const { current: event, loading, error } = useSelector((state) => state.events);
+  const eventId = Number(id);
+  const dispatch = useAppDispatch();
+  const { current: event, loading, error } = useAppSelector((state) => state.events);
 
   const [activeTab, setActiveTab] = useState('tasks');
-  const [pendingAiTemplate, setPendingAiTemplate] = useState(null);
+  const [pendingAiTemplate, setPendingAiTemplate] = useState<string | undefined>();
 
   // Initial fetch
   useEffect(() => {
-    if (id) dispatch(fetchEvent(id));
-  }, [id, dispatch]);
+    if (Number.isFinite(eventId)) dispatch(fetchEvent(eventId));
+  }, [eventId, dispatch]);
 
   // 30s polling (SCRUM-19)
   useEffect(() => {
-    if (!id) return;
-    const timer = setInterval(() => dispatch(fetchEvent(id)), 30000);
+    if (!Number.isFinite(eventId)) return;
+    const timer = setInterval(() => dispatch(fetchEvent(eventId)), 30000);
     return () => clearInterval(timer);
-  }, [id, dispatch]);
+  }, [eventId, dispatch]);
 
   function handleActivate() {
-    dispatch(activateEvent(id));
+    dispatch(activateEvent(eventId));
   }
 
   function handleRefresh() {
-    dispatch(fetchEvent(id));
+    dispatch(fetchEvent(eventId));
   }
 
   if (loading && !event) return <LoadingMsg>Loading event...</LoadingMsg>;
@@ -398,7 +400,7 @@ export default function EventDetail() {
             </InfoRow>
           )}
         </InfoGrid>
-        <GooglePhotosField eventId={id} event={event} />
+        <GooglePhotosField eventId={eventId} event={event} />
       </Section>
 
       {/* Tab bar */}
@@ -421,30 +423,30 @@ export default function EventDetail() {
         {activeTab === 'tasks' && (
           <>
             <SectionTitle>Tasks</SectionTitle>
-            <TaskChecklist eventId={id} tasks={tasks} onRefresh={handleRefresh} />
+            <TaskChecklist eventId={eventId} tasks={tasks} onRefresh={handleRefresh} />
           </>
         )}
         {activeTab === 'guests' && (
           <>
             <SectionTitle>Guests</SectionTitle>
-            <GuestList eventId={id} />
+            <GuestList eventId={eventId} />
           </>
         )}
         {activeTab === 'budget' && (
           <>
             <SectionTitle>Budget</SectionTitle>
-            <BudgetTracker eventId={id} eventBudget={event.budget} />
+            <BudgetTracker eventId={eventId} eventBudget={event.budget} />
           </>
         )}
         {activeTab === 'gifts' && (
           <>
             <SectionTitle>Gifts</SectionTitle>
-            <GiftTracker eventId={id} />
+            <GiftTracker eventId={eventId} />
           </>
         )}
         {activeTab === 'invites' && (
           <InviteFlow
-            eventId={id}
+            eventId={eventId}
             event={event}
             onRefresh={handleRefresh}
             suggestedTemplate={pendingAiTemplate}
@@ -453,15 +455,15 @@ export default function EventDetail() {
         {activeTab === 'photos' && (
           <>
             <SectionTitle>Photos</SectionTitle>
-            <PhotoGallery eventId={id} />
+            <PhotoGallery eventId={eventId} />
           </>
         )}
         {activeTab === 'ai' && (
           <>
             <SectionTitle>AI Suggestions</SectionTitle>
             <AISuggestions
-              eventId={id}
-              onUseTemplate={(template) => {
+              eventId={eventId}
+              onUseTemplate={(template: string) => {
                 setPendingAiTemplate(template);
                 setActiveTab('invites');
               }}

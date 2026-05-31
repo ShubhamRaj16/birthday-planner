@@ -1,20 +1,22 @@
 import { screen } from '@testing-library/react';
 import { renderWithStore } from '../../test/renderWithStore';
 import BudgetTracker from '../../components/BudgetTracker';
+import type { ReactNode } from 'react';
+import type { Expense, RootState } from '../../types';
 
 // Mock recharts — SVG layout APIs not available in jsdom
 vi.mock('recharts', () => ({
-  BarChart: ({ children }) => <div data-testid="bar-chart">{children}</div>,
+  BarChart: ({ children }: { children: ReactNode }) => <div data-testid="bar-chart">{children}</div>,
   Bar: () => null,
   XAxis: () => null,
   YAxis: () => null,
   Tooltip: () => null,
-  ResponsiveContainer: ({ children }) => <div>{children}</div>,
+  ResponsiveContainer: ({ children }: { children: ReactNode }) => <div>{children}</div>,
 }));
 
-const makeState = (expenses) => ({
+const makeState = (expenses: Partial<Expense>[]): Partial<RootState> => ({
   expenses: {
-    byEventId: { 42: expenses },
+    byEventId: { 42: expenses as Expense[] },
     summaryByEventId: {},
     loading: false,
     error: null,

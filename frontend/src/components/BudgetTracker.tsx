@@ -1,13 +1,19 @@
-import { useEffect, useState } from 'react';
-import { useDispatch, useSelector } from 'react-redux';
+import { useEffect, useState, type FormEvent } from 'react';
+import { useAppDispatch, useAppSelector } from '../redux/hooks';
 import styled from 'styled-components';
 import { BarChart, Bar, XAxis, YAxis, Tooltip, ResponsiveContainer } from 'recharts';
+import type { Expense } from '../types';
 import {
   fetchExpenses,
   createExpense,
   updateExpense,
   deleteExpense,
 } from '../redux/slices/expensesSlice';
+
+interface BudgetTrackerProps {
+  eventId: number;
+  eventBudget?: number | string | null;
+}
 
 // ─── Constants ────────────────────────────────────────────────────────────────
 
@@ -60,7 +66,7 @@ const SummaryValue = styled.span`
   color: #1f2937;
 `;
 
-const AlertBanner = styled.div`
+const AlertBanner = styled.div<{ $level: 'over' | 'warn' }>`
   padding: 0.65rem 1rem;
   border-radius: 8px;
   font-size: 0.85rem;
@@ -236,11 +242,11 @@ const EmptyMsg = styled.p`
 
 // ─── Component ────────────────────────────────────────────────────────────────
 
-export default function BudgetTracker({ eventId, eventBudget }) {
-  const dispatch = useDispatch();
-  const expenses = useSelector((state) => state.expenses.byEventId[eventId] || []);
-  const summary = useSelector((state) => state.expenses.summaryByEventId[eventId]);
-  const expError = useSelector((state) => state.expenses.error);
+export default function BudgetTracker({ eventId, eventBudget }: BudgetTrackerProps) {
+  const dispatch = useAppDispatch();
+  const expenses = useAppSelector((state) => state.expenses.byEventId[eventId] || []);
+  const summary = useAppSelector((state) => state.expenses.summaryByEventId[eventId]);
+  const expError = useAppSelector((state) => state.expenses.error);
 
   const [addOpen, setAddOpen] = useState(false);
   const [form, setForm] = useState({ label: '', amount: '', category: 'miscellaneous', paid: false });
@@ -252,7 +258,7 @@ export default function BudgetTracker({ eventId, eventBudget }) {
   }, [eventId, dispatch]);
 
   const budget = Number(eventBudget) || 0;
-  const spent = summary?.totalSpent ?? expenses.reduce((s, e) => s + Number(e.amount || 0), 0);
+  const spent = summary?.total ?? expenses.reduce((s, e) => s + Number(e.amount || 0), 0);
   const unpaid = expenses.filter((e) => !e.paid).reduce((s, e) => s + Number(e.amount || 0), 0);
   const remaining = budget - spent;
   const pct = budget > 0 ? (spent / budget) * 100 : 0;
@@ -265,7 +271,7 @@ export default function BudgetTracker({ eventId, eventBudget }) {
       .reduce((s, e) => s + Number(e.amount || 0), 0),
   })).filter((c) => c.amount > 0);
 
-  async function handleAddExpense(e) {
+  async function handleAddExpense(e: FormEvent<HTMLFormElement>) {
     e.preventDefault();
     if (!form.label.trim()) { setFormError('Label is required.'); return; }
     if (!form.amount || isNaN(Number(form.amount))) { setFormError('Valid amount is required.'); return; }
@@ -277,17 +283,17 @@ export default function BudgetTracker({ eventId, eventBudget }) {
       setForm({ label: '', amount: '', category: 'miscellaneous', paid: false });
       setAddOpen(false);
     } catch (err) {
-      setFormError(err || 'Failed to add expense.');
+      setFormError(String(err || 'Failed to add expense.'));
     } finally {
       setAdding(false);
     }
   }
 
-  async function handlePaidToggle(expense) {
+  async function handlePaidToggle(expense: Expense) {
     dispatch(updateExpense({ eventId, id: expense.id, data: { paid: !expense.paid } }));
   }
 
-  async function handleDelete(expenseId) {
+  async function handleDelete(expenseId: number) {
     if (!window.confirm('Delete this expense?')) return;
     await dispatch(deleteExpense({ eventId, id: expenseId })).unwrap();
     dispatch(fetchExpenses(eventId));

@@ -1,16 +1,18 @@
 import { screen, render } from '@testing-library/react';
-import TaskChecklist from '../../components/TaskChecklist';
+import TaskChecklist, { type TaskChecklistTask } from '../../components/TaskChecklist';
 import dayjs from 'dayjs';
 
 const pastDate = dayjs().subtract(2, 'day').toISOString();
 const futureDate = dayjs().add(7, 'day').toISOString();
 
-const makeTasks = (overrides = []) => [
-  { id: 1, title: 'Fix venue',  done: true,  dueDate: pastDate,   category: 'venue' },
-  { id: 2, title: 'Book cake',  done: false, dueDate: futureDate, category: 'cake' },
-  { id: 3, title: 'Send invites', done: false, dueDate: pastDate, category: 'invites/printing' },
-  ...overrides,
-];
+const makeTasks = (overrides: Partial<TaskChecklistTask>[] = []): TaskChecklistTask[] => {
+  const base: TaskChecklistTask[] = [
+    { id: 1, title: 'Fix venue', done: true, dueDate: pastDate, category: 'venue' },
+    { id: 2, title: 'Book cake', done: false, dueDate: futureDate, category: 'cake' },
+    { id: 3, title: 'Send invites', done: false, dueDate: pastDate, category: 'invites/printing' },
+  ];
+  return [...base, ...(overrides as TaskChecklistTask[])];
+};
 
 describe('TaskChecklist', () => {
   describe('progress', () => {

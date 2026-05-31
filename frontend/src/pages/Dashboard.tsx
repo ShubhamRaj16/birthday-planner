@@ -1,11 +1,12 @@
 import { useEffect } from 'react';
-import { useDispatch, useSelector } from 'react-redux';
+import { useAppDispatch, useAppSelector } from '../redux/hooks';
 import { Link } from 'react-router-dom';
 import styled from 'styled-components';
 import dayjs from 'dayjs';
 import { mediaUrl } from '../lib/apiClient';
 import { fetchChildren } from '../redux/slices/childrenSlice';
 import { fetchUpcoming } from '../redux/slices/eventsSlice';
+import type { Child, EventStatus } from '../types';
 
 const PageTitle = styled.h1`
   font-size: 1.6rem;
@@ -76,7 +77,7 @@ const ChildName = styled.p`
   text-overflow: ellipsis;
 `;
 
-const DaysUntil = styled.p`
+const DaysUntil = styled.p<{ $soon: boolean }>`
   font-size: 0.8rem;
   color: ${({ $soon }) => ($soon ? '#f59e0b' : '#6b7280')};
   margin-top: 2px;
@@ -108,7 +109,7 @@ const EventDate = styled.p`
   margin-top: 2px;
 `;
 
-const StatusBadge = styled.span`
+const StatusBadge = styled.span<{ status: EventStatus }>`
   font-size: 0.72rem;
   font-weight: 600;
   padding: 2px 8px;
@@ -177,7 +178,7 @@ const MyGateWarning = styled(Link)`
   }
 `;
 
-function getDaysUntilBirthday(dobStr) {
+function getDaysUntilBirthday(dobStr: string | null) {
   if (!dobStr) return null;
   const today = dayjs();
   const dob = dayjs(dobStr);
@@ -188,7 +189,7 @@ function getDaysUntilBirthday(dobStr) {
   return next.diff(today, 'day');
 }
 
-function ChildBirthdayCard({ child }) {
+function ChildBirthdayCard({ child }: { child: Child }) {
   const days = getDaysUntilBirthday(child.dob);
   const initial = (child.name || '?')[0].toUpperCase();
 
@@ -214,12 +215,12 @@ function ChildBirthdayCard({ child }) {
 }
 
 export default function Dashboard() {
-  const dispatch = useDispatch();
-  const { items: children, loading: childrenLoading } = useSelector(
+  const dispatch = useAppDispatch();
+  const { items: children, loading: childrenLoading } = useAppSelector(
     (state) => state.children
   );
-  const { items: events } = useSelector((state) => state.events);
-  const unreadCount = useSelector((state) => state.reminders.unreadCount);
+  const { items: events } = useAppSelector((state) => state.events);
+  const unreadCount = useAppSelector((state) => state.reminders.unreadCount);
 
   useEffect(() => {
     dispatch(fetchChildren());

@@ -1,6 +1,7 @@
-import { useEffect, useState } from 'react';
-import { useDispatch, useSelector } from 'react-redux';
+import { useEffect, useState, type FormEvent } from 'react';
+import { useAppDispatch, useAppSelector } from '../redux/hooks';
 import styled from 'styled-components';
+import type { Guest, RsvpStatus } from '../types';
 import {
   fetchGuests,
   createGuest,
@@ -8,6 +9,10 @@ import {
   deleteGuest,
   bulkImportGuests,
 } from '../redux/slices/guestsSlice';
+
+interface GuestListProps {
+  eventId: number;
+}
 
 // ─── Styled components ────────────────────────────────────────────────────────
 
@@ -61,7 +66,7 @@ const Td = styled.td`
   color: #111827;
 `;
 
-const RsvpBadge = styled.button`
+const RsvpBadge = styled.button<{ rsvp: RsvpStatus }>`
   border: none;
   border-radius: 999px;
   padding: 3px 12px;
@@ -81,7 +86,7 @@ const RsvpBadge = styled.button`
   &:hover { opacity: 0.8; }
 `;
 
-const ToggleBtn = styled.button`
+const ToggleBtn = styled.button<{ $active: boolean }>`
   background: none;
   border: 1px solid ${({ $active }) => ($active ? '#7c3aed' : '#d1d5db')};
   color: ${({ $active }) => ($active ? '#7c3aed' : '#9ca3af')};
@@ -227,14 +232,14 @@ const EmptyMsg = styled.p`
 
 // ─── RSVP cycle ───────────────────────────────────────────────────────────────
 
-const RSVP_CYCLE = { Pending: 'Confirmed', Confirmed: 'Declined', Declined: 'Pending' };
+const RSVP_CYCLE: Record<RsvpStatus, RsvpStatus> = { Pending: 'Confirmed', Confirmed: 'Declined', Declined: 'Pending' };
 
 // ─── Component ────────────────────────────────────────────────────────────────
 
-export default function GuestList({ eventId }) {
-  const dispatch = useDispatch();
-  const guests = useSelector((state) => state.guests.byEventId[eventId] || []);
-  const guestError = useSelector((state) => state.guests.error);
+export default function GuestList({ eventId }: GuestListProps) {
+  const dispatch = useAppDispatch();
+  const guests = useAppSelector((state) => state.guests.byEventId[eventId] || []);
+  const guestError = useAppSelector((state) => state.guests.error);
 
   // Add-guest form state
   const [addOpen, setAddOpen] = useState(false);
@@ -258,22 +263,22 @@ export default function GuestList({ eventId }) {
   const pending = guests.filter((g) => g.rsvp === 'Pending' || !g.rsvp).length;
   const declined = guests.filter((g) => g.rsvp === 'Declined').length;
 
-  async function handleRsvpToggle(guest) {
+  async function handleRsvpToggle(guest: Guest) {
     const currentRsvp = guest.rsvp || 'Pending';
     const nextRsvp = RSVP_CYCLE[currentRsvp] || 'Confirmed';
     dispatch(updateGuest({ eventId, id: guest.id, data: { rsvp: nextRsvp } }));
   }
 
-  async function handleInviteToggle(guest) {
+  async function handleInviteToggle(guest: Guest) {
     dispatch(updateGuest({ eventId, id: guest.id, data: { inviteSent: !guest.inviteSent } }));
   }
 
-  async function handleDelete(guestId) {
+  async function handleDelete(guestId: number) {
     if (!window.confirm('Remove this guest?')) return;
     dispatch(deleteGuest({ eventId, id: guestId }));
   }
 
-  async function handleAddGuest(e) {
+  async function handleAddGuest(e: FormEvent<HTMLFormElement>) {
     e.preventDefault();
     if (!form.name.trim()) { setFormError('Name is required.'); return; }
     setFormError('');
@@ -283,13 +288,13 @@ export default function GuestList({ eventId }) {
       setForm({ name: '', phone: '', ageGroup: 'adult', dietary: '' });
       setAddOpen(false);
     } catch (err) {
-      setFormError(err || 'Failed to add guest.');
+      setFormError(String(err || 'Failed to add guest.'));
     } finally {
       setAdding(false);
     }
   }
 
-  async function handleCsvImport(e) {
+  async function handleCsvImport(e: FormEvent<HTMLFormElement>) {
     e.preventDefault();
     setCsvError('');
     const lines = csvText.trim().split('\n').filter(Boolean);
@@ -306,7 +311,7 @@ export default function GuestList({ eventId }) {
       setCsvText('');
       setCsvOpen(false);
     } catch (err) {
-      setCsvError(err || 'Bulk import failed.');
+      setCsvError(String(err || 'Bulk import failed.'));
     } finally {
       setImporting(false);
     }

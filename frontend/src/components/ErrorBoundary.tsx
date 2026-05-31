@@ -1,6 +1,15 @@
 import React from 'react';
 import styled from 'styled-components';
 
+interface ErrorBoundaryProps {
+  children: React.ReactNode;
+  fallback?: React.ReactNode;
+}
+
+interface ErrorBoundaryState {
+  hasError: boolean;
+}
+
 const Fallback = styled.div`
   max-width: 600px;
   margin: 4rem auto;
@@ -22,8 +31,8 @@ const Fallback = styled.div`
   }
 `;
 
-export default class ErrorBoundary extends React.Component {
-  constructor(props) {
+export default class ErrorBoundary extends React.Component<ErrorBoundaryProps, ErrorBoundaryState> {
+  constructor(props: ErrorBoundaryProps) {
     super(props);
     this.state = { hasError: false };
   }
@@ -32,7 +41,7 @@ export default class ErrorBoundary extends React.Component {
     return { hasError: true };
   }
 
-  componentDidCatch(error, info) {
+  componentDidCatch(error: Error, info: React.ErrorInfo) {
     console.error('ErrorBoundary caught an error:', error, info.componentStack);
   }
 

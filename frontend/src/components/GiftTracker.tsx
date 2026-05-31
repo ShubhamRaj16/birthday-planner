@@ -1,12 +1,17 @@
-import { useEffect, useState } from 'react';
-import { useDispatch, useSelector } from 'react-redux';
+import { useEffect, useState, type FormEvent } from 'react';
+import { useAppDispatch, useAppSelector } from '../redux/hooks';
 import styled from 'styled-components';
+import type { Gift, GiftStatus } from '../types';
 import {
   fetchGifts,
   createGift,
   updateGift,
   deleteGift,
 } from '../redux/slices/giftsSlice';
+
+interface GiftTrackerProps {
+  eventId: number;
+}
 
 // ─── Styled components ────────────────────────────────────────────────────────
 
@@ -21,7 +26,7 @@ const FilterTabs = styled.div`
   flex-wrap: wrap;
 `;
 
-const TabBtn = styled.button`
+const TabBtn = styled.button<{ $active: boolean }>`
   padding: 0.35rem 0.9rem;
   border-radius: 999px;
   font-size: 0.82rem;
@@ -74,7 +79,7 @@ const GiftMeta = styled.span`
   color: #9ca3af;
 `;
 
-const StatusBadge = styled.span`
+const StatusBadge = styled.span<{ status: GiftStatus }>`
   display: inline-block;
   font-size: 0.72rem;
   font-weight: 600;
@@ -192,19 +197,20 @@ const EmptyMsg = styled.p`
 
 // ─── Status transitions ───────────────────────────────────────────────────────
 
-const STATUS_NEXT = { idea: 'bought', bought: 'received' };
-const STATUS_LABEL = { idea: 'Mark Bought', bought: 'Mark Received' };
+const STATUS_NEXT: Partial<Record<GiftStatus, GiftStatus>> = { idea: 'bought', bought: 'received' };
+const STATUS_LABEL: Partial<Record<GiftStatus, string>> = { idea: 'Mark Bought', bought: 'Mark Received' };
 
 // ─── Component ────────────────────────────────────────────────────────────────
 
-const FILTER_TABS = ['all', 'idea', 'bought', 'received'];
+type GiftFilter = 'all' | GiftStatus;
+const FILTER_TABS: GiftFilter[] = ['all', 'idea', 'bought', 'received'];
 
-export default function GiftTracker({ eventId }) {
-  const dispatch = useDispatch();
-  const gifts = useSelector((state) => state.gifts.byEventId[eventId] || []);
-  const giftError = useSelector((state) => state.gifts.error);
+export default function GiftTracker({ eventId }: GiftTrackerProps) {
+  const dispatch = useAppDispatch();
+  const gifts = useAppSelector((state) => state.gifts.byEventId[eventId] || []);
+  const giftError = useAppSelector((state) => state.gifts.error);
 
-  const [filter, setFilter] = useState('all');
+  const [filter, setFilter] = useState<GiftFilter>('all');
   const [addOpen, setAddOpen] = useState(false);
   const [form, setForm] = useState({ name: '', description: '', price: '', notes: '' });
   const [formError, setFormError] = useState('');
@@ -216,18 +222,18 @@ export default function GiftTracker({ eventId }) {
 
   const visible = filter === 'all' ? gifts : gifts.filter((g) => g.status === filter);
 
-  async function handleStatusAdvance(gift) {
+  async function handleStatusAdvance(gift: Gift) {
     const next = STATUS_NEXT[gift.status];
     if (!next) return;
     dispatch(updateGift({ eventId, id: gift.id, data: { status: next } }));
   }
 
-  async function handleDelete(giftId) {
+  async function handleDelete(giftId: number) {
     if (!window.confirm('Delete this gift?')) return;
     dispatch(deleteGift({ eventId, id: giftId }));
   }
 
-  async function handleAddGift(e) {
+  async function handleAddGift(e: FormEvent<HTMLFormElement>) {
     e.preventDefault();
     if (!form.name.trim()) { setFormError('Name is required.'); return; }
     setFormError('');
@@ -244,7 +250,7 @@ export default function GiftTracker({ eventId }) {
       setForm({ name: '', description: '', price: '', notes: '' });
       setAddOpen(false);
     } catch (err) {
-      setFormError(err || 'Failed to add gift.');
+      setFormError(String(err || 'Failed to add gift.'));
     } finally {
       setAdding(false);
     }

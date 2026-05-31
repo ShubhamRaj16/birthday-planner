@@ -1,5 +1,5 @@
-import { useEffect, useState } from 'react';
-import { useDispatch, useSelector } from 'react-redux';
+import { useEffect, useState, type ChangeEvent, type FormEvent } from 'react';
+import { useAppDispatch, useAppSelector } from '../redux/hooks';
 import styled from 'styled-components';
 import dayjs from 'dayjs';
 import { fetchChildren, createChild, updateChild, deleteChild } from '../redux/slices/childrenSlice';
@@ -295,7 +295,25 @@ const TimelineLink = styled.a`
   &:hover { text-decoration: underline; }
 `;
 
-function getAge(dobStr) {
+interface ChildFormData {
+  name: string;
+  dob: string;
+  interests: string;
+  allergies: string;
+  school: string;
+  avatar: File | null;
+}
+
+interface ChildFormProps {
+  initial?: ChildFormData;
+  onSubmit: (formData: FormData, form: ChildFormData) => void;
+  onCancel: () => void;
+  loading: boolean;
+  error: string | null;
+  title: string;
+}
+
+function getAge(dobStr: string | null) {
   if (!dobStr) return null;
   const dob = new Date(dobStr);
   const today = new Date();
@@ -312,21 +330,21 @@ const EMPTY_FORM = {
   allergies: '',
   school: '',
   avatar: null,
-};
+} satisfies ChildFormData;
 
-function ChildForm({ initial = EMPTY_FORM, onSubmit, onCancel, loading, error, title }) {
+function ChildForm({ initial = EMPTY_FORM, onSubmit, onCancel, loading, error, title }: ChildFormProps) {
   const [form, setForm] = useState(initial);
 
-  function handleChange(e) {
+  function handleChange(e: ChangeEvent<HTMLInputElement>) {
     const { name, value, files } = e.target;
     if (name === 'avatar') {
-      setForm((f) => ({ ...f, avatar: files[0] || null }));
+      setForm((f) => ({ ...f, avatar: files?.[0] || null }));
     } else {
       setForm((f) => ({ ...f, [name]: value }));
     }
   }
 
-  function handleSubmit(e) {
+  function handleSubmit(e: FormEvent<HTMLFormElement>) {
     e.preventDefault();
     const fd = new FormData();
     fd.append('name', form.name);
@@ -425,29 +443,30 @@ function ChildForm({ initial = EMPTY_FORM, onSubmit, onCancel, loading, error, t
 }
 
 export default function Children() {
-  const dispatch = useDispatch();
-  const { items: children, loading, error } = useSelector((state) => state.children);
+  const dispatch = useAppDispatch();
+  const { items: children, loading, error } = useAppSelector((state) => state.children);
   const [showForm, setShowForm] = useState(false);
-  const [editingId, setEditingId] = useState(null);
+  const [editingId, setEditingId] = useState<number | null>(null);
 
   useEffect(() => {
     dispatch(fetchChildren());
   }, [dispatch]);
 
-  function handleCreate(fd) {
+  function handleCreate(fd: FormData) {
     dispatch(createChild(fd)).then((action) => {
-      if (!action.error) setShowForm(false);
+      if (createChild.fulfilled.match(action)) setShowForm(false);
     });
   }
 
-  function handleUpdate(fd) {
+  function handleUpdate(fd: FormData) {
     // SCRUM-52: send FormData so avatar changes persist on edit (was a plain object)
+    if (editingId == null) return;
     dispatch(updateChild({ id: editingId, data: fd })).then((action) => {
-      if (!action.error) setEditingId(null);
+      if (updateChild.fulfilled.match(action)) setEditingId(null);
     });
   }
 
-  function handleDelete(id) {
+  function handleDelete(id: number) {
     if (window.confirm('Delete this child and all their events?')) {
       dispatch(deleteChild(id));
     }

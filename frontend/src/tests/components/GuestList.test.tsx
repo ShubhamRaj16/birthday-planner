@@ -1,17 +1,18 @@
 import { screen } from '@testing-library/react';
 import { renderWithStore } from '../../test/renderWithStore';
 import GuestList from '../../components/GuestList';
+import type { Guest, RootState } from '../../types';
 
 // Pre-populated Redux state with test guests
-const makeState = (guests) => ({
+const makeState = (guests: Partial<Guest>[]): Partial<RootState> => ({
   guests: {
-    byEventId: { 42: guests },
+    byEventId: { 42: guests as Guest[] },
     loading: false,
     error: null,
   },
 });
 
-const mockGuests = [
+const mockGuests: Partial<Guest>[] = [
   { id: 1, name: 'Alice', rsvp: 'Confirmed', inviteSent: false, phone: '9876543210', ageGroup: 'adult', dietary: '' },
   { id: 2, name: 'Bob',   rsvp: 'Pending',   inviteSent: true,  phone: '9876543211', ageGroup: 'adult', dietary: '' },
   { id: 3, name: 'Carol', rsvp: 'Declined',  inviteSent: false, phone: '9876543212', ageGroup: 'child', dietary: '' },

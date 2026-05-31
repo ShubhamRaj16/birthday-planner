@@ -1,9 +1,26 @@
-import { useEffect, useState } from 'react';
-import { useDispatch, useSelector } from 'react-redux';
+import { useEffect, useState, type MouseEvent } from 'react';
+import { useAppDispatch, useAppSelector } from '../redux/hooks';
 import styled from 'styled-components';
-import dayjs from 'dayjs';
+import dayjs, { type Dayjs } from 'dayjs';
 import { fetchEvents } from '../redux/slices/eventsSlice';
 import { fetchChildren } from '../redux/slices/childrenSlice';
+import type { Child, Event } from '../types';
+
+interface CalendarDay {
+  date: Dayjs;
+  otherMonth: boolean;
+}
+
+interface CalendarItems {
+  birthdays: Array<{ child: Child; color: string }>;
+  events: Array<{ event: Event; color: string }>;
+}
+
+interface PopoverState extends CalendarItems {
+  x: number;
+  y: number;
+  date: Dayjs;
+}
 
 const CHILD_COLORS = ['#7c3aed', '#0ea5e9', '#f59e0b', '#10b981', '#f43f5e'];
 
@@ -75,7 +92,7 @@ const CalendarGrid = styled.div`
   grid-template-columns: repeat(7, 1fr);
 `;
 
-const DayCell = styled.div`
+const DayCell = styled.div<{ $hasItems: boolean; $today: boolean; $otherMonth: boolean }>`
   min-height: 80px;
   border-right: 1px solid #f3f4f6;
   border-bottom: 1px solid #f3f4f6;
@@ -94,7 +111,7 @@ const DayCell = styled.div`
   }
 `;
 
-const DayNumber = styled.div`
+const DayNumber = styled.div<{ $today: boolean; $otherMonth: boolean }>`
   font-size: 0.8rem;
   font-weight: ${({ $today }) => ($today ? '700' : '400')};
   color: ${({ $today, $otherMonth }) =>
@@ -116,7 +133,7 @@ const DotRow = styled.div`
   margin-bottom: 2px;
 `;
 
-const Dot = styled.span`
+const Dot = styled.span<{ color: string }>`
   width: 7px;
   height: 7px;
   border-radius: 50%;
@@ -125,7 +142,7 @@ const Dot = styled.span`
   flex-shrink: 0;
 `;
 
-const EventPill = styled.div`
+const EventPill = styled.div<{ color: string }>`
   background: ${({ color }) => color}22;
   color: ${({ color }) => color};
   border-left: 2px solid ${({ color }) => color};
@@ -139,7 +156,7 @@ const EventPill = styled.div`
   margin-bottom: 2px;
 `;
 
-const Popover = styled.div`
+const Popover = styled.div<{ $x: number; $y: number }>`
   position: fixed;
   background: #fff;
   border: 1px solid #e5e7eb;
@@ -189,12 +206,12 @@ const CloseButton = styled.button`
 
 const WEEKDAYS = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
 
-function getMonthDays(year, month) {
+function getMonthDays(year: number, month: number): CalendarDay[] {
   // month is 0-indexed for dayjs
   const firstDay = dayjs(new Date(year, month, 1));
   const lastDay = firstDay.endOf('month');
   const startOffset = firstDay.day(); // 0=Sun
-  const days = [];
+  const days: CalendarDay[] = [];
 
   // days from previous month
   for (let i = startOffset - 1; i >= 0; i--) {
@@ -215,15 +232,15 @@ function getMonthDays(year, month) {
 }
 
 export default function Calendar() {
-  const dispatch = useDispatch();
-  const { items: events } = useSelector((state) => state.events);
-  const { items: children } = useSelector((state) => state.children);
+  const dispatch = useAppDispatch();
+  const { items: events } = useAppSelector((state) => state.events);
+  const { items: children } = useAppSelector((state) => state.children);
 
   const today = dayjs();
   const [viewYear, setViewYear] = useState(today.year());
   const [viewMonth, setViewMonth] = useState(today.month()); // 0-indexed
 
-  const [popover, setPopover] = useState(null); // { x, y, date, birthdays, events }
+  const [popover, setPopover] = useState<PopoverState | null>(null);
 
   useEffect(() => {
     dispatch(fetchEvents());
@@ -231,7 +248,7 @@ export default function Calendar() {
   }, [dispatch]);
 
   // Build a map: dateKey -> { birthdays: [], events: [] }
-  const dateMap = {};
+  const dateMap: Record<string, CalendarItems> = {};
 
   children.forEach((child, idx) => {
     if (!child.dob) return;
@@ -242,7 +259,7 @@ export default function Calendar() {
     dateMap[key].birthdays.push({ child, color: CHILD_COLORS[idx % CHILD_COLORS.length] });
   });
 
-  events.forEach((event, _idx) => {
+  events.forEach((event) => {
     if (!event.date) return;
     const key = dayjs(event.date).format('YYYY-MM-DD');
     if (!dateMap[key]) dateMap[key] = { birthdays: [], events: [] };
@@ -271,7 +288,11 @@ export default function Calendar() {
     setPopover(null);
   }
 
-  function handleDayClick(e, dayObj, items) {
+  function handleDayClick(
+    e: MouseEvent<HTMLDivElement>,
+    dayObj: CalendarDay,
+    items?: CalendarItems,
+  ) {
     if (!items || (items.birthdays.length === 0 && items.events.length === 0)) return;
     const rect = e.currentTarget.getBoundingClientRect();
     const x = Math.min(rect.right + 4, window.innerWidth - 310);

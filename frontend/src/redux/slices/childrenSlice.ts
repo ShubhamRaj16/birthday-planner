@@ -3,7 +3,7 @@ import apiClient from '../../lib/apiClient';
 import { getApiError } from '../../lib/apiError';
 import type { ApiResponse, Child, ChildrenState } from '../../types';
 
-type UpdateChildArgs = { id: number; data: Partial<Child> };
+type UpdateChildArgs = { id: number; data: Partial<Child> | FormData };
 
 export const fetchChildren = createAsyncThunk(
   'children/fetchAll',
