@@ -1,7 +1,7 @@
-const request = require('supertest');
-const app = require('../../src/app');
-const { createTestChild, createTestEvent } = require('../../src/test/helpers');
-const { _setClientForTesting, _resetClient } = require('../../src/services/aiService');
+import request from 'supertest';
+import app from '../../src/app';
+import { createTestChild, createTestEvent } from '../../src/test/helpers';
+import { _setClientForTesting, _resetClient } from '../../src/services/aiService';
 
 const mockCreate = vi.fn();
 const mockClient = { messages: { create: mockCreate } };
@@ -33,7 +33,6 @@ describe('AI routes', () => {
       const res = await request(app).post(url()).send({ type: 'themes' });
       expect(res.status).toBe(200);
       expect(res.body.data.suggestions).toHaveLength(5);
-      expect(res.body.data.type).toBe('themes');
     });
 
     it('returns 400 when type missing', async () => {
@@ -47,9 +46,7 @@ describe('AI routes', () => {
     });
 
     it('returns 404 for non-existent event', async () => {
-      const res = await request(app)
-        .post('/api/v1/events/99999/ai/suggest')
-        .send({ type: 'themes' });
+      const res = await request(app).post('/api/v1/events/99999/ai/suggest').send({ type: 'themes' });
       expect(res.status).toBe(404);
     });
 

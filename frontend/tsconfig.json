@@ -1,0 +1,24 @@
+{
+  "compilerOptions": {
+    "target": "ES2020",
+    "module": "ESNext",
+    "moduleResolution": "Bundler",
+    "lib": ["ES2020", "DOM", "DOM.Iterable"],
+    "jsx": "react-jsx",
+    "strict": true,
+    "esModuleInterop": true,
+    "allowSyntheticDefaultImports": true,
+    "skipLibCheck": true,
+    "resolveJsonModule": true,
+    "forceConsistentCasingInFileNames": true,
+    "noEmit": true,
+    "types": ["node"]
+  },
+  "//": "Phased migration: strict typecheck covers the data layer (types, lib, redux). UI (.jsx pages/components) compiles via Babel and migrates to .tsx in a later phase.",
+  "include": [
+    "src/types.ts",
+    "src/lib/**/*.ts",
+    "src/redux/**/*.ts"
+  ],
+  "exclude": ["node_modules", "dist"]
+}

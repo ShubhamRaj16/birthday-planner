@@ -79,8 +79,8 @@ model Task {
 
 model Reminder {
   id        Int      @id @default(autoincrement())
-  eventId   Int      @map("event_id")
-  event     Event    @relation(fields: [eventId], references: [id], onDelete: Cascade)
+  eventId   Int?     @map("event_id")
+  event     Event?   @relation(fields: [eventId], references: [id], onDelete: Cascade)
   triggerAt DateTime @map("trigger_at")
   fired     Boolean  @default(false)
   label     String

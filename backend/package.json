@@ -1,15 +1,17 @@
 {
   "name": "birthday-planner-backend",
   "version": "1.0.0",
-  "main": "server.js",
+  "main": "dist/server.js",
   "scripts": {
-    "dev": "nodemon server.js",
-    "start": "node server.js",
-    "backup": "node src/lib/backup.js",
-    "lint": "eslint 'src/**/*.js'",
-    "lint:fix": "eslint 'src/**/*.js' --fix",
-    "format": "prettier --write 'src/**/*.js'",
-    "format:check": "prettier --check 'src/**/*.js'",
+    "dev": "tsx watch server.ts",
+    "build": "tsc",
+    "start": "node dist/server.js",
+    "backup": "tsx src/lib/backup.ts",
+    "typecheck": "tsc --noEmit",
+    "lint": "eslint 'src/**/*.ts' 'server.ts'",
+    "lint:fix": "eslint 'src/**/*.ts' 'server.ts' --fix",
+    "format": "prettier --write 'src/**/*.ts' 'server.ts'",
+    "format:check": "prettier --check 'src/**/*.ts' 'server.ts'",
     "test": "vitest run",
     "test:watch": "vitest",
     "test:coverage": "vitest run --coverage",
@@ -28,12 +30,21 @@
     "prisma": "^5.14.0"
   },
   "devDependencies": {
+    "@types/archiver": "^7.0.0",
+    "@types/cors": "^2.8.19",
+    "@types/express": "^4.17.25",
+    "@types/multer": "^2.1.0",
+    "@types/node": "^25.9.1",
+    "@types/node-cron": "^3.0.11",
+    "@types/supertest": "^7.2.0",
     "@vitest/coverage-v8": "^4.1.7",
     "eslint": "^9.39.4",
     "eslint-config-prettier": "^10.1.8",
     "nodemon": "^3.1.4",
     "prettier": "^3.8.3",
     "supertest": "^7.2.2",
+    "tsx": "^4.22.3",
+    "typescript": "^5.6.3",
     "vitest": "^4.1.7"
   }
 }

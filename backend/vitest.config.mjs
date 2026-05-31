@@ -8,7 +8,7 @@ export default defineConfig({
       DATABASE_URL: 'file:./test.db',
     },
     globalSetup: './src/test/globalSetup.mjs',
-    setupFiles: ['./src/test/setup.js'],
+    setupFiles: ['./src/test/setup.ts'],
     fileParallelism: false,
     testTimeout: 15000,
     include: ['tests/**/*.test.js'],

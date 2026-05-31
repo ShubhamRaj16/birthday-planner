@@ -238,6 +238,7 @@ export default function TaskChecklist({ eventId, tasks = [], onRefresh }) {
   const [formError, setFormError] = useState('');
   const [adding, setAdding] = useState(false);
   const [resetting, setResetting] = useState(false);
+  const [opError, setOpError] = useState('');
 
   // Sort tasks by dueDate ascending (null/undefined tasks go last)
   const sorted = [...tasks].sort((a, b) => {
@@ -255,12 +256,18 @@ export default function TaskChecklist({ eventId, tasks = [], onRefresh }) {
     return !task.done && task.dueDate && dayjs(task.dueDate).isBefore(TODAY);
   }
 
+  // SCRUM-41: surface operation errors to the user (auto-clears after 5s)
+  function showOpError(msg) {
+    setOpError(msg);
+    setTimeout(() => setOpError(''), 5000);
+  }
+
   async function handleToggle(task) {
     try {
       await apiClient.put(`/tasks/${task.id}`, { done: !task.done });
       onRefresh && onRefresh();
     } catch (err) {
-      console.error('Task toggle failed:', err.message);
+      showOpError(err.response?.data?.error?.message || 'Failed to update task.');
     }
   }
 
@@ -270,7 +277,7 @@ export default function TaskChecklist({ eventId, tasks = [], onRefresh }) {
       await apiClient.delete(`/events/${eventId}/tasks/${taskId}`);
       onRefresh && onRefresh();
     } catch (err) {
-      console.error('Task delete failed:', err.message);
+      showOpError(err.response?.data?.error?.message || 'Failed to delete task.');
     }
   }
 
@@ -310,6 +317,7 @@ export default function TaskChecklist({ eventId, tasks = [], onRefresh }) {
 
   return (
     <Wrapper>
+      {opError && <ErrorMsg role="alert">{opError}</ErrorMsg>}
       {/* Progress bar */}
       <ProgressSection>
         <ProgressHeader>
