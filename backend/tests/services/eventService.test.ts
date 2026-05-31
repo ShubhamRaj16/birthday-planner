@@ -1,8 +1,8 @@
 import { createTestChild } from '../../src/test/helpers';
-const {
+import {
   createEvent, getEvent, updateEvent, deleteEvent,
   listEvents, getUpcomingEvents, activateEvent,
-} = require('../../src/services/eventService');
+} from '../../src/services/eventService';
 
 
 import prisma from '../../src/lib/prisma';

@@ -1,7 +1,7 @@
 import { createTestChild, createTestEvent, createTestGuest } from '../../src/test/helpers';
-const {
+import {
   listGuests, createGuest, updateGuest, deleteGuest, bulkImportGuests,
-} = require('../../src/services/guestService');
+} from '../../src/services/guestService';
 
 
 import prisma from '../../src/lib/prisma';

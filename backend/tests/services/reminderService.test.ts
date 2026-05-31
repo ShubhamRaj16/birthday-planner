@@ -1,8 +1,8 @@
 import { createTestChild, createTestEvent, createTestReminder } from '../../src/test/helpers';
-const {
+import {
   fireDueReminders, getUnreadCount, createReminder,
   markRead, completePassedEvents,
-} = require('../../src/services/reminderService');
+} from '../../src/services/reminderService';
 
 
 import prisma from '../../src/lib/prisma';

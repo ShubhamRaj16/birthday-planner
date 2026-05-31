@@ -1,7 +1,7 @@
 import { createTestChild, createTestEvent, createTestExpense } from '../../src/test/helpers';
-const {
+import {
   listExpenses, getSummary, createExpense, updateExpense, deleteExpense,
-} = require('../../src/services/expenseService');
+} from '../../src/services/expenseService';
 
 const ALL_CATEGORIES = [
   'venue', 'catering', 'cake', 'decorations', 'return gifts',
