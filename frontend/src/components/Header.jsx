@@ -1,6 +1,8 @@
-import { useSelector } from 'react-redux';
+import { useEffect } from 'react';
+import { useSelector, useDispatch } from 'react-redux';
 import { Link, useLocation } from 'react-router-dom';
 import styled from 'styled-components';
+import { fetchUnreadCount } from '../redux/slices/remindersSlice';
 
 const Nav = styled.nav`
   background-color: #7c3aed;
@@ -63,7 +65,15 @@ const Badge = styled.span`
 
 export default function Header() {
   const location = useLocation();
+  const dispatch = useDispatch();
   const unreadCount = useSelector((state) => state.reminders.unreadCount);
+
+  // SCRUM-37: poll unread reminder count every 60s (matches backend cron) + on navigation
+  useEffect(() => {
+    dispatch(fetchUnreadCount());
+    const timer = setInterval(() => dispatch(fetchUnreadCount()), 60000);
+    return () => clearInterval(timer);
+  }, [dispatch, location.pathname]);
 
   const isActive = (path) => {
     if (path === '/') return location.pathname === '/';

@@ -440,8 +440,9 @@ export default function Children() {
     });
   }
 
-  function handleUpdate(fd, formValues) {
-    dispatch(updateChild({ id: editingId, data: formValues })).then((action) => {
+  function handleUpdate(fd) {
+    // SCRUM-52: send FormData so avatar changes persist on edit (was a plain object)
+    dispatch(updateChild({ id: editingId, data: fd })).then((action) => {
       if (!action.error) setEditingId(null);
     });
   }
