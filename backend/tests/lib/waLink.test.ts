@@ -1,4 +1,4 @@
-const { normalisePhone, buildWaLink } = require('../../src/lib/waLink');
+import { normalisePhone, buildWaLink } from '../../src/lib/waLink';
 
 describe('normalisePhone', () => {
   it('prepends 91 to 10-digit number', () => {

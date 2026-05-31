@@ -1,7 +1,7 @@
-const request = require('supertest');
-const app = require('../../src/app');
-const { createTestChild, createTestEvent } = require('../../src/test/helpers');
-const prisma = require('../../src/lib/prisma');
+import request from 'supertest';
+import app from '../../src/app';
+import { createTestChild, createTestEvent } from '../../src/test/helpers';
+import prisma from '../../src/lib/prisma';
 
 describe('Gifts routes', () => {
   let child, event;

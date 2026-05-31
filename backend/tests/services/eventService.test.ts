@@ -1,11 +1,11 @@
-const { createTestChild } = require('../../src/test/helpers');
+import { createTestChild } from '../../src/test/helpers';
 const {
   createEvent, getEvent, updateEvent, deleteEvent,
   listEvents, getUpcomingEvents, activateEvent,
 } = require('../../src/services/eventService');
 
 
-const prisma = require('../../src/lib/prisma');
+import prisma from '../../src/lib/prisma';
 
 const TASK_COUNT = 11; // taskDefaults.js defines 11 tasks
 

@@ -1,5 +1,5 @@
-const { buildMessage, previewMessage, getDefaultTemplate } = require('../../src/services/whatsappService');
-const dayjs = require('dayjs');
+import { buildMessage, previewMessage, getDefaultTemplate } from '../../src/services/whatsappService';
+import dayjs from 'dayjs';
 
 const mockEvent = {
   date: new Date('2026-07-15'),

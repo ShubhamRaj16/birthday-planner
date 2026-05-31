@@ -1,8 +1,8 @@
-const { createTestChild, createTestEvent } = require('../../src/test/helpers');
-const { createGift, updateGift, deleteGift, listGifts } = require('../../src/services/giftService');
+import { createTestChild, createTestEvent } from '../../src/test/helpers';
+import { createGift, updateGift, deleteGift, listGifts } from '../../src/services/giftService';
 
 
-const prisma = require('../../src/lib/prisma');
+import prisma from '../../src/lib/prisma';
 
 describe('giftService', () => {
   let child, event;

@@ -1,6 +1,6 @@
-const request = require('supertest');
-const app = require('../../src/app');
-const { createTestChild, createTestEvent, createTestGuest } = require('../../src/test/helpers');
+import request from 'supertest';
+import app from '../../src/app';
+import { createTestChild, createTestEvent, createTestGuest } from '../../src/test/helpers';
 
 describe('Guests routes', () => {
   let child, event;

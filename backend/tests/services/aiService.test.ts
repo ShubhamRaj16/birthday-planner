@@ -1,5 +1,5 @@
 // No module mock needed — we inject a mock client directly via _setClientForTesting
-const { getSuggestions, _resetClient, _setClientForTesting } = require('../../src/services/aiService');
+import { getSuggestions, _resetClient, _setClientForTesting } from '../../src/services/aiService';
 
 const mockCreate = vi.fn();
 const mockClient = { messages: { create: mockCreate } };

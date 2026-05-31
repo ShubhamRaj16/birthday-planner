@@ -1,10 +1,10 @@
-const { createTestChild, createTestEvent, createTestGuest } = require('../../src/test/helpers');
+import { createTestChild, createTestEvent, createTestGuest } from '../../src/test/helpers';
 const {
   listGuests, createGuest, updateGuest, deleteGuest, bulkImportGuests,
 } = require('../../src/services/guestService');
 
 
-const prisma = require('../../src/lib/prisma');
+import prisma from '../../src/lib/prisma';
 
 describe('guestService', () => {
   let child, event;

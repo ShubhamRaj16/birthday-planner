@@ -1,4 +1,4 @@
-const { createTestChild, createTestEvent, createTestExpense } = require('../../src/test/helpers');
+import { createTestChild, createTestEvent, createTestExpense } from '../../src/test/helpers';
 const {
   listExpenses, getSummary, createExpense, updateExpense, deleteExpense,
 } = require('../../src/services/expenseService');

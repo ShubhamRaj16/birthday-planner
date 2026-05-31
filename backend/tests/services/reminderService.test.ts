@@ -1,11 +1,11 @@
-const { createTestChild, createTestEvent, createTestReminder } = require('../../src/test/helpers');
+import { createTestChild, createTestEvent, createTestReminder } from '../../src/test/helpers';
 const {
   fireDueReminders, getUnreadCount, createReminder,
   markRead, completePassedEvents,
 } = require('../../src/services/reminderService');
 
 
-const prisma = require('../../src/lib/prisma');
+import prisma from '../../src/lib/prisma';
 
 describe('reminderService', () => {
   let child, event;
@@ -80,7 +80,7 @@ describe('reminderService', () => {
   describe('completePassedEvents', () => {
     it('marks past Active events as Completed', async () => {
       const past = new Date(Date.now() - 24 * 60 * 60 * 1000).toISOString();
-      const { createEvent } = require('../../src/services/eventService');
+      import { createEvent } from '../../src/services/eventService';
       const pastEvent = await createEvent({ childId: child.id, date: past });
       await prisma.event.update({ where: { id: pastEvent.id }, data: { status: 'Active' } });
 
@@ -93,7 +93,7 @@ describe('reminderService', () => {
 
     it('does not affect future Active events', async () => {
       const future = new Date(Date.now() + 7 * 24 * 60 * 60 * 1000).toISOString();
-      const { createEvent, activateEvent } = require('../../src/services/eventService');
+      import { createEvent, activateEvent } from '../../src/services/eventService';
       const futureEvent = await createEvent({ childId: child.id, date: future });
       await activateEvent(futureEvent.id);
 

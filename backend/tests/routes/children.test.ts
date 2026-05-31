@@ -1,6 +1,6 @@
-const request = require('supertest');
-const app = require('../../src/app');
-const { createTestChild } = require('../../src/test/helpers');
+import request from 'supertest';
+import app from '../../src/app';
+import { createTestChild } from '../../src/test/helpers';
 
 const FUTURE = new Date(Date.now() + 30 * 24 * 60 * 60 * 1000).toISOString();
 
