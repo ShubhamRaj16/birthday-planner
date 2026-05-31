@@ -41,7 +41,7 @@ module.exports = {
   ignorePatterns: ['node_modules/', 'prisma/migrations/'],
   overrides: [
     {
-      files: ['src/test/**/*.js', 'src/test/**/*.mjs', 'tests/**/*.js'],
+      files: ['src/test/**/*.{js,ts}', 'src/test/**/*.mjs', 'tests/**/*.{js,ts}'],
       globals: {
         vi: 'readonly',
         describe: 'readonly',
