@@ -1,11 +1,11 @@
 ---
 name: phase1-lessons
-description: Bugs found and rules established during Phase 1 build — apply these to every future phase to avoid repeating mistakes
+description: Bugs found and rules established across Phases 1–3 — apply these to every future phase to avoid repeating mistakes
 metadata:
   type: project
 ---
 
-Phase 1 completed 2026-05-30. All backend stories (SCRUM-6,7,9,11) done. Frontend (Webpack SSR + Redux + styled-components) built and running. Full retrospective in Confluence "Phase 1 Retrospective" page.
+Phase 1 completed 2026-05-30. Phases 2 and 3 complete. Full retrospective in Confluence "Phase 1 Retrospective" page (now updated with Phase 3 bugs).
 
 ## SQLite / Prisma rules (never break these)
 - **No Prisma enums** — SQLite doesn't support them. Use `String @default("Draft")` and validate in service layer.
@@ -38,6 +38,26 @@ Any route that receives `multipart/form-data` (even if the file is optional) MUS
 Specific mismatches caught in Phase 1:
 - `child.dateOfBirth` → `child.dob` (used in Children, Dashboard, Calendar)
 - `child.avatarUrl` → `child.photo` (used in Children, Dashboard)
+
+## Redux slice — BOTH stores must be updated (Phase 3 lesson)
+**This is the most dangerous omission — it crashes the entire app silently.**
+
+Every time a new Redux slice is created, update ALL THREE files:
+1. `src/redux/slices/newSlice.js` — create the slice
+2. `src/redux/store.js` — add to reducer map (SSR store factory)
+3. `src/client/index.js` — add to reducer map (client hydration store) ← **the one that gets forgotten**
+
+**Why it's critical:** The SSR server uses `store.js`. The client uses `client/index.js`. If a reducer is in `store.js` but not in `client/index.js`, the SSR renders fine but on the client `state.sliceName` is `undefined`. Any component calling `useSelector(state => state.sliceName.anything)` throws a TypeError that unmounts the entire React tree, breaking all client-side routing until hard refresh.
+
+Found in Phase 3 review: `guests`, `expenses`, `gifts` reducers were in `store.js` but missing from `client/index.js`. Clicking Guests/Budget/Gifts/Invites tabs crashed the whole app.
+
+## SSR dynamic route status codes (Phase 3 lesson)
+The SSR server's `getStatusCode` function must use regex pattern matching, not literal string equality, when checking if a path is known.
+
+- `Set.has('/events/:id')` does NOT match `/events/1` → returns 404 in production
+- Fix: `r.path.replace(/:[^/]+/g, '[^/]+')` converts `:id` to a regex pattern
+
+File: `frontend/src/server/index.js` — `getStatusCode` function. Already fixed.
 
 ## API completeness rule
 Do not ship a UI element that calls an endpoint that doesn't exist yet. Either implement both together or leave the UI hidden. (Caused 404 on task toggle in Phase 1.)
