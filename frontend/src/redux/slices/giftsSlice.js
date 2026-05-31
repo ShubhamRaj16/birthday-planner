@@ -38,21 +38,25 @@ const giftsSlice = createSlice({
       .addCase(fetchGifts.fulfilled, (state, action) => {
         state.byEventId[action.payload.eventId] = action.payload.gifts;
       })
+      .addCase(fetchGifts.rejected, (state, action) => { state.error = action.payload; })
       .addCase(createGift.fulfilled, (state, action) => {
         const eid = action.payload.eventId;
         if (!state.byEventId[eid]) state.byEventId[eid] = [];
         state.byEventId[eid].unshift(action.payload.gift);
       })
+      .addCase(createGift.rejected, (state, action) => { state.error = action.payload; })
       .addCase(updateGift.fulfilled, (state, action) => {
         const { eventId, gift } = action.payload;
         const list = state.byEventId[eventId] || [];
         const idx = list.findIndex(g => g.id === gift.id);
         if (idx !== -1) list[idx] = gift;
       })
+      .addCase(updateGift.rejected, (state, action) => { state.error = action.payload; })
       .addCase(deleteGift.fulfilled, (state, action) => {
         const { eventId, id } = action.payload;
         state.byEventId[eventId] = (state.byEventId[eventId] || []).filter(g => g.id !== id);
-      });
+      })
+      .addCase(deleteGift.rejected, (state, action) => { state.error = action.payload; });
   },
 });
 

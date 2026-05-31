@@ -42,7 +42,7 @@ function getClientAssets() {
         .filter((asset) => asset.endsWith('.js'))
         .map((asset) => `/static/${asset}`),
     };
-  } catch (error) {
+  } catch (_error) {
     const jsPath = path.join(clientBuildPath, 'js');
 
     try {

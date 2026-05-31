@@ -357,14 +357,18 @@ export default function InviteFlow({ eventId, event, onRefresh, suggestedTemplat
   }, [event.messageTemplate, templateLoaded]);
 
   // Apply AI-generated template when passed from parent
+  // SCRUM-50: replace with prop initialisation or key-reset pattern
+  /* eslint-disable react-hooks/set-state-in-effect */
   useEffect(() => {
     if (suggestedTemplate) setTemplate(suggestedTemplate);
   }, [suggestedTemplate]);
 
   // Sync myGateLink when event prop updates
+  // SCRUM-50: derive from prop directly instead of mirroring via effect
   useEffect(() => {
     setMyGateLink(event.myGateLink || '');
   }, [event.myGateLink]);
+  /* eslint-enable react-hooks/set-state-in-effect */
 
   // ── Section A: Card upload ────────────────────────────────────────────────
 

@@ -1,4 +1,4 @@
-function errorHandler(err, req, res, next) {
+function errorHandler(err, req, res, _next) {
   // Prisma: record not found on update/delete
   if (err.code === 'P2025') {
     return res.status(404).json({

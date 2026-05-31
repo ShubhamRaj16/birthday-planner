@@ -244,6 +244,8 @@ function GooglePhotosField({ eventId, event }) {
   const [url, setUrl] = useState(event.googlePhotosUrl || '');
   const [saved, setSaved] = useState(false);
 
+  // SCRUM-50: derive from prop directly instead of mirroring via effect
+  /* eslint-disable-next-line react-hooks/set-state-in-effect */
   useEffect(() => { setUrl(event.googlePhotosUrl || ''); }, [event.googlePhotosUrl]);
 
   async function handleSave() {

@@ -50,16 +50,19 @@ const expensesSlice = createSlice({
         if (!state.byEventId[eid]) state.byEventId[eid] = [];
         state.byEventId[eid].unshift(action.payload.expense);
       })
+      .addCase(createExpense.rejected, (state, action) => { state.error = action.payload; })
       .addCase(updateExpense.fulfilled, (state, action) => {
         const { eventId, expense } = action.payload;
         const list = state.byEventId[eventId] || [];
         const idx = list.findIndex(e => e.id === expense.id);
         if (idx !== -1) list[idx] = expense;
       })
+      .addCase(updateExpense.rejected, (state, action) => { state.error = action.payload; })
       .addCase(deleteExpense.fulfilled, (state, action) => {
         const { eventId, id } = action.payload;
         state.byEventId[eventId] = (state.byEventId[eventId] || []).filter(e => e.id !== id);
-      });
+      })
+      .addCase(deleteExpense.rejected, (state, action) => { state.error = action.payload; });
   },
 });
 

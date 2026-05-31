@@ -5,7 +5,15 @@
   "scripts": {
     "dev": "nodemon server.js",
     "start": "node server.js",
-    "backup": "node src/lib/backup.js"
+    "backup": "node src/lib/backup.js",
+    "lint": "eslint 'src/**/*.js'",
+    "lint:fix": "eslint 'src/**/*.js' --fix",
+    "format": "prettier --write 'src/**/*.js'",
+    "format:check": "prettier --check 'src/**/*.js'",
+    "test": "vitest run",
+    "test:watch": "vitest",
+    "test:coverage": "vitest run --coverage",
+    "test:related": "vitest related"
   },
   "dependencies": {
     "@anthropic-ai/sdk": "^0.24.0",
@@ -20,6 +28,12 @@
     "prisma": "^5.14.0"
   },
   "devDependencies": {
-    "nodemon": "^3.1.4"
+    "@vitest/coverage-v8": "^4.1.7",
+    "eslint": "^9.39.4",
+    "eslint-config-prettier": "^10.1.8",
+    "nodemon": "^3.1.4",
+    "prettier": "^3.8.3",
+    "supertest": "^7.2.2",
+    "vitest": "^4.1.7"
   }
 }

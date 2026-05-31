@@ -242,7 +242,7 @@ export default function Calendar() {
     dateMap[key].birthdays.push({ child, color: CHILD_COLORS[idx % CHILD_COLORS.length] });
   });
 
-  events.forEach((event, idx) => {
+  events.forEach((event, _idx) => {
     if (!event.date) return;
     const key = dayjs(event.date).format('YYYY-MM-DD');
     if (!dateMap[key]) dateMap[key] = { birthdays: [], events: [] };

@@ -1,7 +1,15 @@
-const Anthropic = require('@anthropic-ai/sdk');
-
-const client = new Anthropic({ apiKey: process.env.ANTHROPIC_API_KEY });
 const MODEL = 'claude-sonnet-4-20250514';
+
+// Lazy init — deferred so tests can mock @anthropic-ai/sdk before client is created
+let _client = null;
+function getClient() {
+  if (!_client) {
+    const Anthropic = require('@anthropic-ai/sdk');
+    const Cls = Anthropic.default || Anthropic;
+    _client = new Cls({ apiKey: process.env.ANTHROPIC_API_KEY });
+  }
+  return _client;
+}
 
 const PROMPTS = {
   themes: (ctx) =>
@@ -65,7 +73,7 @@ function parseJsonArray(text) {
   // Fallback: split on numbered list lines or newlines
   return text
     .split('\n')
-    .map((l) => l.replace(/^\d+[\.\)]\s*/, '').trim())
+    .map((l) => l.replace(/^\d+[.)]\s*/, '').trim())
     .filter(Boolean)
     .slice(0, 5);
 }
@@ -76,7 +84,7 @@ async function getSuggestions(type, event, child) {
   const ctx = buildContext(event, child);
   const promptText = PROMPTS[type](ctx);
 
-  const response = await client.messages.create({
+  const response = await getClient().messages.create({
     model: MODEL,
     max_tokens: 1024,
     messages: [{ role: 'user', content: promptText }],
@@ -88,4 +96,7 @@ async function getSuggestions(type, event, child) {
   return { type, suggestions };
 }
 
-module.exports = { getSuggestions };
+function _resetClient() { _client = null; }
+function _setClientForTesting(mock) { _client = mock; }
+
+module.exports = { getSuggestions, _resetClient, _setClientForTesting };

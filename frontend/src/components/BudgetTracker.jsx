@@ -211,20 +211,6 @@ const PrimaryBtn = styled.button`
   &:disabled { background: #c4b5fd; cursor: not-allowed; }
 `;
 
-const SecondaryBtn = styled.button`
-  background: #fff;
-  color: #7c3aed;
-  border: 1.5px solid #7c3aed;
-  border-radius: 8px;
-  padding: 0.45rem 1rem;
-  font-size: 0.875rem;
-  font-weight: 600;
-  cursor: pointer;
-  white-space: nowrap;
-
-  &:hover { background: #f3f0ff; }
-`;
-
 const ChartSection = styled.div`
   margin-top: 1.5rem;
 `;

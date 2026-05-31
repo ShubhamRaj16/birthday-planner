@@ -53,7 +53,7 @@ export const markRead = createAsyncThunk(
   'reminders/markRead',
   async (ids, { rejectWithValue }) => {
     try {
-      const response = await apiClient.post('/reminders/mark-read', { ids });
+      await apiClient.post('/reminders/mark-read', { ids });
       return ids;
     } catch (error) {
       return rejectWithValue(error.response?.data?.error || error.message);

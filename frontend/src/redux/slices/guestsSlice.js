@@ -53,20 +53,24 @@ const guestsSlice = createSlice({
         if (!state.byEventId[eid]) state.byEventId[eid] = [];
         state.byEventId[eid].push(action.payload);
       })
+      .addCase(createGuest.rejected, (state, action) => { state.error = action.payload; })
       .addCase(updateGuest.fulfilled, (state, action) => {
         const eid = action.payload.eventId;
         const list = state.byEventId[eid] || [];
         const idx = list.findIndex(g => g.id === action.payload.id);
         if (idx !== -1) list[idx] = action.payload;
       })
+      .addCase(updateGuest.rejected, (state, action) => { state.error = action.payload; })
       .addCase(deleteGuest.fulfilled, (state, action) => {
         Object.keys(state.byEventId).forEach(eid => {
           state.byEventId[eid] = (state.byEventId[eid] || []).filter(g => g.id !== action.payload);
         });
       })
+      .addCase(deleteGuest.rejected, (state, action) => { state.error = action.payload; })
       .addCase(bulkImportGuests.fulfilled, (state) => {
         state.loading = false;
-      });
+      })
+      .addCase(bulkImportGuests.rejected, (state, action) => { state.error = action.payload; });
   },
 });
 
