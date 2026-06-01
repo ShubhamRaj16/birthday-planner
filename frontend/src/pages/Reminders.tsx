@@ -395,7 +395,7 @@ export default function Reminders() {
               ) : (
                 <UnfiredBadge>Pending</UnfiredBadge>
               )}
-              {reminder.fired && !reminder.read && (
+              {reminder.fired && reminder.type !== 'read' && (
                 <SuccessButton onClick={() => handleMarkRead(reminder.id)}>
                   Mark read
                 </SuccessButton>

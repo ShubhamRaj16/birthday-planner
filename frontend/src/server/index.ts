@@ -87,7 +87,7 @@ function getAbsoluteUrl(req: Request): string {
 validateEnv();
 
 const app = express();
-const PORT = process.env.PORT || 3000;
+const PORT = Number(process.env.PORT) || 3000;
 const clientBuildPath = path.resolve(process.cwd(), 'dist/client');
 const isDevelopment = process.env.NODE_ENV !== 'production';
 

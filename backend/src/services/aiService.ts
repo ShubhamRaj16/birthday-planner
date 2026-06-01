@@ -1,3 +1,4 @@
+import Anthropic from '@anthropic-ai/sdk';
 import type { Child, Event } from '@prisma/client';
 import type { SuggestionType, AiContext, SuggestionResult } from '../types';
 
@@ -13,14 +14,14 @@ interface AnthropicClient {
   };
 }
 
+// Lazy construction (not import): the SDK ctor reads ANTHROPIC_API_KEY, so we
+// defer `new Anthropic(...)` until first use. Tests inject a mock via
+// _setClientForTesting before getClient() ever constructs the real client.
 let _client: AnthropicClient | null = null;
 
 function getClient(): AnthropicClient {
   if (!_client) {
-    // eslint-disable-next-line @typescript-eslint/no-require-imports
-    const Anthropic = require('@anthropic-ai/sdk') as { default?: new (o: { apiKey?: string }) => AnthropicClient } & (new (o: { apiKey?: string }) => AnthropicClient);
-    const Cls = (Anthropic.default ?? Anthropic) as new (o: { apiKey?: string }) => AnthropicClient;
-    _client = new Cls({ apiKey: process.env.ANTHROPIC_API_KEY });
+    _client = new Anthropic({ apiKey: process.env.ANTHROPIC_API_KEY }) as unknown as AnthropicClient;
   }
   return _client;
 }

@@ -101,7 +101,6 @@ export interface Reminder {
   eventId: number | null;
   triggerAt: string;
   fired: boolean;
-  read?: boolean;
   label: string;
   type: string;
   createdAt: string;
