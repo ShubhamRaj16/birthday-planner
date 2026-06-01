@@ -1,10 +1,13 @@
 node_modules/
 .env
 backend/prisma/birthday.db
+backend/prisma/test.db
 backend/prisma/*.db-journal
 backend/prisma/*.db-wal
 backend/prisma/*.db-shm
 backend/uploads/**
 !backend/uploads/**/.gitkeep
+backend/backup/
+backup/
 dist/
 .DS_Store

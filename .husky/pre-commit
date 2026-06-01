@@ -1,0 +1,28 @@
+#!/bin/sh
+set -e
+
+STAGED=$(git diff --cached --name-only)
+
+# Lint backend if any backend/src JS files staged
+if echo "$STAGED" | grep -q "^backend/src/.*\.js$"; then
+  echo "[pre-commit] Linting backend..."
+  cd backend
+  ESLINT_USE_FLAT_CONFIG=false ./node_modules/.bin/eslint 'src/**/*.js'
+  cd ..
+fi
+
+# Lint frontend if any frontend/src JS/JSX files staged
+if echo "$STAGED" | grep -qE "^frontend/src/.*\.(js|jsx)$"; then
+  echo "[pre-commit] Linting frontend..."
+  cd frontend
+  ESLINT_USE_FLAT_CONFIG=false ./node_modules/.bin/eslint 'src/**/*.{js,jsx}'
+  cd ..
+fi
+
+# Validate schema if schema.prisma staged
+if echo "$STAGED" | grep -q "backend/prisma/schema.prisma"; then
+  echo "[pre-commit] Validating Prisma schema..."
+  cd backend && ./node_modules/.bin/prisma validate && cd ..
+fi
+
+echo "[pre-commit] All checks passed."

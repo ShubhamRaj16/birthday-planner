@@ -35,16 +35,31 @@ model Event {
   myGateLink      String?      @map("my_gate_link")
   cardPath        String?      @map("card_path")
   messageTemplate String?      @map("message_template")
-  notes           String?
-  tasks           Task[]
-  reminders       Reminder[]
-  guests          Guest[]
-  expenses        Expense[]
-  gifts           Gift[]
-  createdAt       DateTime     @default(now()) @map("created_at")
-  updatedAt       DateTime     @updatedAt @map("updated_at")
+  notes              String?
+  googlePhotosUrl    String?      @map("google_photos_url")
+  tasks              Task[]
+  reminders          Reminder[]
+  guests             Guest[]
+  expenses           Expense[]
+  gifts              Gift[]
+  photos             Photo[]
+  createdAt          DateTime     @default(now()) @map("created_at")
+  updatedAt          DateTime     @updatedAt @map("updated_at")
 
   @@map("events")
+}
+
+model Photo {
+  id          Int      @id @default(autoincrement())
+  eventId     Int      @map("event_id")
+  event       Event    @relation(fields: [eventId], references: [id], onDelete: Cascade)
+  storagePath String   @map("storage_path")
+  caption     String?
+  isCover     Boolean  @default(false) @map("is_cover")
+  createdAt   DateTime @default(now()) @map("created_at")
+  updatedAt   DateTime @updatedAt      @map("updated_at")
+
+  @@map("photos")
 }
 
 model Task {
@@ -64,8 +79,8 @@ model Task {
 
 model Reminder {
   id        Int      @id @default(autoincrement())
-  eventId   Int      @map("event_id")
-  event     Event    @relation(fields: [eventId], references: [id], onDelete: Cascade)
+  eventId   Int?     @map("event_id")
+  event     Event?   @relation(fields: [eventId], references: [id], onDelete: Cascade)
   triggerAt DateTime @map("trigger_at")
   fired     Boolean  @default(false)
   label     String
