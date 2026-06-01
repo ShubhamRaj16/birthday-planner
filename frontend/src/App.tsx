@@ -3,6 +3,7 @@ import styled from 'styled-components';
 import Header from './components/Header';
 import Footer from './components/Footer';
 import ErrorBoundary from './components/ErrorBoundary';
+import ToastHost from './components/Toast';
 import type { ComponentType } from 'react';
 
 export interface AppRoute {
@@ -44,6 +45,7 @@ export default function App({ routes }: AppProps) {
         </ErrorBoundary>
       </Main>
       <Footer />
+      <ToastHost />
     </AppWrapper>
   );
 }

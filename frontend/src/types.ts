@@ -183,6 +183,16 @@ export interface PhotosState {
   error: string | null;
 }
 
+export interface ToastItem {
+  id: number;
+  message: string;
+  variant: 'success' | 'error' | 'info';
+}
+
+export interface ToastState {
+  items: ToastItem[];
+}
+
 export interface RootState {
   children: ChildrenState;
   events: EventsState;
@@ -191,4 +201,5 @@ export interface RootState {
   expenses: ExpensesState;
   gifts: GiftsState;
   photos: PhotosState;
+  toast: ToastState;
 }

@@ -6,6 +6,7 @@ import guestsReducer from './slices/guestsSlice';
 import expensesReducer from './slices/expensesSlice';
 import giftsReducer from './slices/giftsSlice';
 import photosReducer from './slices/photosSlice';
+import toastReducer from './slices/toastSlice';
 import type { RootState } from '../types';
 
 export type PreloadedState = Partial<RootState>;
@@ -22,6 +23,7 @@ export function createStore(preloadedState: PreloadedState = {}) {
       expenses: expensesReducer,
       gifts: giftsReducer,
       photos: photosReducer,
+      toast: toastReducer,
     },
     preloadedState,
   });
