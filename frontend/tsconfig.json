@@ -6,15 +6,20 @@
     "lib": ["ES2020", "DOM", "DOM.Iterable"],
     "jsx": "react-jsx",
     "strict": true,
-    "allowJs": true,
+    "allowJs": false,
     "esModuleInterop": true,
     "allowSyntheticDefaultImports": true,
     "skipLibCheck": true,
     "resolveJsonModule": true,
     "forceConsistentCasingInFileNames": true,
     "noEmit": true,
-    "types": ["node", "vitest/globals", "@testing-library/jest-dom"]
+    "types": ["node"]
   },
-  "include": ["src/**/*.ts", "src/**/*.tsx"],
+  "//": "Phased migration: strict typecheck covers the data layer (types, lib, redux). SSR server (src/server) and UI (.jsx) compile via webpack/Babel and migrate to strict TS in a later phase.",
+  "include": [
+    "src/types.ts",
+    "src/lib/**/*.ts",
+    "src/redux/**/*.ts"
+  ],
   "exclude": ["node_modules", "dist"]
 }
