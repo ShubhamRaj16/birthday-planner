@@ -61,7 +61,7 @@ function escape(str: string): string {
 export function generateHeadTags(pathname: string, absoluteUrl: string): string {
   // Match exact path or fall back to wildcard
   const route = routeMeta[pathname] || routeMeta['*'];
-  const meta = { ...defaultMeta, ...route, url: absoluteUrl } as RouteMeta & DefaultMeta;
+  const meta = { ...defaultMeta, ...route, url: absoluteUrl } as Required<RouteMeta> & DefaultMeta;
 
   return `
     <title>${escape(meta.title)}</title>

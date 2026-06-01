@@ -19,7 +19,10 @@
   "include": [
     "src/types.ts",
     "src/lib/**/*.ts",
-    "src/redux/**/*.ts"
+    "src/redux/**/*.ts",
+    "src/server/**/*.ts",
+    "src/services/**/*.ts",
+    "src/routes/**/*.ts"
   ],
   "exclude": ["node_modules", "dist"]
 }

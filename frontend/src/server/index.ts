@@ -121,7 +121,8 @@ const ssrMiddleware: RequestHandler = async (req, res) => {
           React.StrictMode,
           null,
           React.createElement(
-            Provider,
+            // SSR glue: Provider's createElement prop typing is over-strict; store is correct.
+            Provider as React.ComponentType<{ store: typeof store; children?: React.ReactNode }>,
             { store },
             React.createElement(
               StaticRouter,

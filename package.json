@@ -9,6 +9,7 @@
     "dev:frontend": "cd frontend && npm run dev",
     "build": "cd frontend && npm run build",
     "start": "cd backend && npm start",
+    "prod": "concurrently -n api,web -c green,cyan \"cd backend && npm start\" \"cd frontend && npm start\"",
     "backup": "cd backend && node src/lib/backup.js",
     "install:all": "npm install && cd backend && npm install && cd ../frontend && npm install",
     "lint": "npm run lint:backend && npm run lint:frontend",
