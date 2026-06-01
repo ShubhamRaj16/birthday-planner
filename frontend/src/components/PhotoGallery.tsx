@@ -142,11 +142,15 @@ export default function PhotoGallery({ eventId }: PhotoGalleryProps) {
   const dispatch = useAppDispatch();
   const photos = useAppSelector((s) => s.photos.byEventId[eventId] || []);
   const loading = useAppSelector((s) => s.photos.loading);
+  const photosError = useAppSelector((s) => s.photos.error); // SCRUM-57
 
   const [selectedFile, setSelectedFile] = useState<File | null>(null);
   const [caption, setCaption] = useState('');
   const [uploading, setUploading] = useState(false);
   const [err, setErr] = useState<string | null>(null);
+  // SCRUM-58: inline caption edit state
+  const [editingId, setEditingId] = useState<number | null>(null);
+  const [editCaption, setEditCaption] = useState('');
   const fileRef = useRef<HTMLInputElement | null>(null);
 
   useEffect(() => {
@@ -186,6 +190,18 @@ export default function PhotoGallery({ eventId }: PhotoGalleryProps) {
     await dispatch(deletePhoto({ eventId, photoId }));
   }
 
+  // SCRUM-58: open / save caption edit
+  function startEdit(photoId: number, current: string | null) {
+    setEditingId(photoId);
+    setEditCaption(current || '');
+  }
+
+  async function saveCaption(photoId: number) {
+    await dispatch(updatePhoto({ eventId, photoId, data: { caption: editCaption.trim() } }));
+    setEditingId(null);
+    setEditCaption('');
+  }
+
   function getPhotoUrl(storagePath: string) {
     return mediaUrl(storagePath);
   }
@@ -213,6 +229,7 @@ export default function PhotoGallery({ eventId }: PhotoGalleryProps) {
       </UploadArea>
 
       {err && <ErrMsg>{err}</ErrMsg>}
+      {photosError && <ErrMsg role="alert">{photosError}</ErrMsg>}
 
       {loading && photos.length === 0 && <EmptyMsg>Loading photos…</EmptyMsg>}
 
@@ -227,15 +244,35 @@ export default function PhotoGallery({ eventId }: PhotoGalleryProps) {
               {photo.isCover && <CoverBadge>Cover</CoverBadge>}
               <PhotoImg src={getPhotoUrl(photo.storagePath)} alt={photo.caption || 'Party photo'} />
               <PhotoFooter>
-                {photo.caption && <PhotoCaption>{photo.caption}</PhotoCaption>}
-                <ActionRow>
-                  {!photo.isCover && (
-                    <SmallBtn onClick={() => handleSetCover(photo.id)}>Set Cover</SmallBtn>
-                  )}
-                  <SmallBtn $variant="danger" onClick={() => handleDelete(photo.id)}>
-                    Delete
-                  </SmallBtn>
-                </ActionRow>
+                {editingId === photo.id ? (
+                  <>
+                    <CaptionInput
+                      autoFocus
+                      placeholder="Caption"
+                      value={editCaption}
+                      onChange={(e) => setEditCaption(e.target.value)}
+                    />
+                    <ActionRow>
+                      <SmallBtn onClick={() => saveCaption(photo.id)}>Save</SmallBtn>
+                      <SmallBtn onClick={() => setEditingId(null)}>Cancel</SmallBtn>
+                    </ActionRow>
+                  </>
+                ) : (
+                  <>
+                    {photo.caption && <PhotoCaption>{photo.caption}</PhotoCaption>}
+                    <ActionRow>
+                      {!photo.isCover && (
+                        <SmallBtn onClick={() => handleSetCover(photo.id)}>Set Cover</SmallBtn>
+                      )}
+                      <SmallBtn onClick={() => startEdit(photo.id, photo.caption)}>
+                        {photo.caption ? 'Edit' : '+ Caption'}
+                      </SmallBtn>
+                      <SmallBtn $variant="danger" onClick={() => handleDelete(photo.id)}>
+                        Delete
+                      </SmallBtn>
+                    </ActionRow>
+                  </>
+                )}
               </PhotoFooter>
             </PhotoCard>
           ))}
