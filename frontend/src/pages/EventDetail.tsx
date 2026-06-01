@@ -309,6 +309,10 @@ export default function EventDetail() {
 
   const [activeTab, setActiveTab] = useState('tasks');
   const [pendingAiTemplate, setPendingAiTemplate] = useState<string | undefined>();
+  // SCRUM-39: event edit form
+  const [editOpen, setEditOpen] = useState(false);
+  const [editForm, setEditForm] = useState({ date: '', venue: '', address: '', theme: '', budget: '', notes: '' });
+  const [savingEdit, setSavingEdit] = useState(false);
 
   // Initial fetch
   useEffect(() => {
@@ -330,6 +334,40 @@ export default function EventDetail() {
     dispatch(fetchEvent(eventId));
   }
 
+  // SCRUM-39: open edit form pre-filled from current event
+  function openEdit() {
+    if (!event) return;
+    setEditForm({
+      date: event.date ? dayjs(event.date).format('YYYY-MM-DD') : '',
+      venue: event.venue || '',
+      address: event.address || '',
+      theme: event.theme || '',
+      budget: event.budget != null ? String(event.budget) : '',
+      notes: event.notes || '',
+    });
+    setEditOpen(true);
+  }
+
+  async function saveEdit() {
+    setSavingEdit(true);
+    try {
+      await dispatch(updateEvent({
+        id: eventId,
+        data: {
+          date: editForm.date || undefined,
+          venue: editForm.venue,
+          address: editForm.address,
+          theme: editForm.theme,
+          budget: editForm.budget === '' ? null : Number(editForm.budget),
+          notes: editForm.notes,
+        },
+      })).unwrap();
+      setEditOpen(false);
+    } finally {
+      setSavingEdit(false);
+    }
+  }
+
   if (loading && !event) return <LoadingMsg>Loading event...</LoadingMsg>;
   if (!event) return <LoadingMsg>Event not found.</LoadingMsg>;
 
@@ -344,6 +382,9 @@ export default function EventDetail() {
         <HeaderActions>
           <RefreshBtn onClick={handleRefresh} title="Refresh event data">
             &#x21bb; Refresh
+          </RefreshBtn>
+          <RefreshBtn onClick={openEdit} title="Edit event details">
+            Edit
           </RefreshBtn>
           {event.status === 'Draft' && (
             <Button onClick={handleActivate} disabled={loading}>
@@ -371,9 +412,51 @@ export default function EventDetail() {
 
       {error && <ErrorMsg>{error}</ErrorMsg>}
 
-      {/* Event details summary */}
+      {/* Event details summary / edit (SCRUM-39) */}
       <Section>
         <SectionTitle>Event Details</SectionTitle>
+        {editOpen ? (
+          <div>
+            <InfoGrid>
+              <InfoRow>
+                <InfoLabel>Date</InfoLabel>
+                <GPInput type="date" value={editForm.date}
+                  onChange={(e) => setEditForm({ ...editForm, date: e.target.value })} />
+              </InfoRow>
+              <InfoRow>
+                <InfoLabel>Theme</InfoLabel>
+                <GPInput value={editForm.theme}
+                  onChange={(e) => setEditForm({ ...editForm, theme: e.target.value })} />
+              </InfoRow>
+              <InfoRow>
+                <InfoLabel>Venue</InfoLabel>
+                <GPInput value={editForm.venue}
+                  onChange={(e) => setEditForm({ ...editForm, venue: e.target.value })} />
+              </InfoRow>
+              <InfoRow>
+                <InfoLabel>Address</InfoLabel>
+                <GPInput value={editForm.address}
+                  onChange={(e) => setEditForm({ ...editForm, address: e.target.value })} />
+              </InfoRow>
+              <InfoRow>
+                <InfoLabel>Budget (₹)</InfoLabel>
+                <GPInput type="number" min="0" value={editForm.budget}
+                  onChange={(e) => setEditForm({ ...editForm, budget: e.target.value })} />
+              </InfoRow>
+              <InfoRow>
+                <InfoLabel>Notes</InfoLabel>
+                <GPInput value={editForm.notes}
+                  onChange={(e) => setEditForm({ ...editForm, notes: e.target.value })} />
+              </InfoRow>
+            </InfoGrid>
+            <div style={{ display: 'flex', gap: '0.5rem', marginTop: '0.75rem' }}>
+              <Button onClick={saveEdit} disabled={savingEdit}>
+                {savingEdit ? 'Saving…' : 'Save Changes'}
+              </Button>
+              <RefreshBtn onClick={() => setEditOpen(false)}>Cancel</RefreshBtn>
+            </div>
+          </div>
+        ) : (
         <InfoGrid>
           {event.venue && (
             <InfoRow>
@@ -400,6 +483,7 @@ export default function EventDetail() {
             </InfoRow>
           )}
         </InfoGrid>
+        )}
         <GooglePhotosField eventId={eventId} event={event} />
       </Section>
 
@@ -429,13 +513,13 @@ export default function EventDetail() {
         {activeTab === 'guests' && (
           <>
             <SectionTitle>Guests</SectionTitle>
-            <GuestList eventId={eventId} />
+            <GuestList eventId={eventId} eventTheme={event.theme} />
           </>
         )}
         {activeTab === 'budget' && (
           <>
             <SectionTitle>Budget</SectionTitle>
-            <BudgetTracker eventId={eventId} eventBudget={event.budget} />
+            <BudgetTracker eventId={eventId} eventBudget={event.budget} eventTheme={event.theme} />
           </>
         )}
         {activeTab === 'gifts' && (

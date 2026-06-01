@@ -2,6 +2,7 @@ import { useEffect, useState, type FormEvent } from 'react';
 import { useAppDispatch, useAppSelector } from '../redux/hooks';
 import styled from 'styled-components';
 import type { Guest, RsvpStatus } from '../types';
+import { toCsv, downloadCsv, fileSlug } from '../lib/csv';
 import {
   fetchGuests,
   createGuest,
@@ -12,6 +13,7 @@ import {
 
 interface GuestListProps {
   eventId: number;
+  eventTheme?: string | null;
 }
 
 // ─── Styled components ────────────────────────────────────────────────────────
@@ -236,7 +238,7 @@ const RSVP_CYCLE: Record<RsvpStatus, RsvpStatus> = { Pending: 'Confirmed', Confi
 
 // ─── Component ────────────────────────────────────────────────────────────────
 
-export default function GuestList({ eventId }: GuestListProps) {
+export default function GuestList({ eventId, eventTheme }: GuestListProps) {
   const dispatch = useAppDispatch();
   const guests = useAppSelector((state) => state.guests.byEventId[eventId] || []);
   const guestError = useAppSelector((state) => state.guests.error);
@@ -276,6 +278,27 @@ export default function GuestList({ eventId }: GuestListProps) {
   async function handleDelete(guestId: number) {
     if (!window.confirm('Remove this guest?')) return;
     dispatch(deleteGuest({ eventId, id: guestId }));
+  }
+
+  // SCRUM-44: download a sample CSV the import accepts
+  function downloadSample() {
+    downloadCsv('guest-import-sample.csv', 'Alice Sharma,9999000001\nBob Mehta,9999000002');
+  }
+
+  // SCRUM-48: export current guest list
+  function exportGuests() {
+    const csv = toCsv<Guest>(
+      [
+        { key: 'name', label: 'Name' },
+        { key: 'phone', label: 'Phone' },
+        { key: 'ageGroup', label: 'Age Group' },
+        { key: 'dietary', label: 'Dietary' },
+        { key: 'rsvp', label: 'RSVP' },
+        { key: 'inviteSent', label: 'Invite Sent' },
+      ],
+      guests,
+    );
+    downloadCsv(`guests-${fileSlug(eventTheme)}-${new Date().toISOString().slice(0, 10)}.csv`, csv);
   }
 
   async function handleAddGuest(e: FormEvent<HTMLFormElement>) {
@@ -335,6 +358,9 @@ export default function GuestList({ eventId }: GuestListProps) {
         <SecondaryBtn onClick={() => { setCsvOpen((v) => !v); setAddOpen(false); }}>
           {csvOpen ? 'Cancel' : 'CSV Import'}
         </SecondaryBtn>
+        <SecondaryBtn onClick={exportGuests} disabled={guests.length === 0}>
+          Export CSV
+        </SecondaryBtn>
       </FormRow>
 
       {/* Add guest form */}
@@ -379,7 +405,11 @@ export default function GuestList({ eventId }: GuestListProps) {
         <FormSection>
           <FormTitle>CSV Bulk Import</FormTitle>
           <p style={{ fontSize: '0.8rem', color: '#6b7280', marginBottom: '0.5rem' }}>
-            One guest per line: <code>name,phone</code>
+            One guest per line, comma-separated: <code>name,phone</code>
+            <br />Name is required; phone is optional. Rows without a name are skipped.
+            <br />Example: <code>Priya Shah,9876543210</code>
+            {' '}&middot;{' '}
+            <a href="#" onClick={(e) => { e.preventDefault(); downloadSample(); }}>Download template</a>
           </p>
           <form onSubmit={handleCsvImport}>
             <CsvTextarea

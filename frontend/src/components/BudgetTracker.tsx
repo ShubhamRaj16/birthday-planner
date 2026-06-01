@@ -1,8 +1,10 @@
-import { useEffect, useState, type FormEvent } from 'react';
+import { useEffect, useRef, useState, type FormEvent } from 'react';
 import { useAppDispatch, useAppSelector } from '../redux/hooks';
 import styled from 'styled-components';
 import { BarChart, Bar, XAxis, YAxis, Tooltip, ResponsiveContainer } from 'recharts';
 import type { Expense } from '../types';
+import apiClient, { mediaUrl } from '../lib/apiClient';
+import { toCsv, downloadCsv, fileSlug } from '../lib/csv';
 import {
   fetchExpenses,
   createExpense,
@@ -13,6 +15,7 @@ import {
 interface BudgetTrackerProps {
   eventId: number;
   eventBudget?: number | string | null;
+  eventTheme?: string | null;
 }
 
 // ─── Constants ────────────────────────────────────────────────────────────────
@@ -242,7 +245,7 @@ const EmptyMsg = styled.p`
 
 // ─── Component ────────────────────────────────────────────────────────────────
 
-export default function BudgetTracker({ eventId, eventBudget }: BudgetTrackerProps) {
+export default function BudgetTracker({ eventId, eventBudget, eventTheme }: BudgetTrackerProps) {
   const dispatch = useAppDispatch();
   const expenses = useAppSelector((state) => state.expenses.byEventId[eventId] || []);
   const summary = useAppSelector((state) => state.expenses.summaryByEventId[eventId]);
@@ -252,6 +255,10 @@ export default function BudgetTracker({ eventId, eventBudget }: BudgetTrackerPro
   const [form, setForm] = useState({ label: '', amount: '', category: 'miscellaneous', paid: false });
   const [formError, setFormError] = useState('');
   const [adding, setAdding] = useState(false);
+  // SCRUM-40: receipt upload state
+  const [uploadingId, setUploadingId] = useState<number | null>(null);
+  const [receiptError, setReceiptError] = useState('');
+  const receiptRefs = useRef<Record<number, HTMLInputElement | null>>({});
 
   useEffect(() => {
     if (eventId) dispatch(fetchExpenses(eventId));
@@ -299,6 +306,41 @@ export default function BudgetTracker({ eventId, eventBudget }: BudgetTrackerPro
     dispatch(fetchExpenses(eventId));
   }
 
+  // SCRUM-40: upload a receipt for an expense (backend multer endpoint)
+  async function handleReceiptUpload(expenseId: number, file: File) {
+    if (file.size > 5 * 1024 * 1024) { setReceiptError('Receipt must be under 5 MB.'); return; }
+    setReceiptError('');
+    setUploadingId(expenseId);
+    try {
+      const fd = new FormData();
+      fd.append('receipt', file);
+      await apiClient.post(`/events/${eventId}/expenses/${expenseId}/receipt`, fd, {
+        headers: { 'Content-Type': 'multipart/form-data' },
+      });
+      dispatch(fetchExpenses(eventId));
+    } catch {
+      setReceiptError('Receipt upload failed.');
+    } finally {
+      setUploadingId(null);
+    }
+  }
+
+  // SCRUM-48: export expenses to CSV
+  function exportExpenses() {
+    const csv = toCsv<Expense>(
+      [
+        { key: 'label', label: 'Label' },
+        { key: 'category', label: 'Category' },
+        { key: 'amount', label: 'Amount' },
+        { key: 'paid', label: 'Paid' },
+        { key: 'date', label: 'Date' },
+        { key: 'notes', label: 'Notes' },
+      ],
+      expenses,
+    );
+    downloadCsv(`expenses-${fileSlug(eventTheme)}-${new Date().toISOString().slice(0, 10)}.csv`, csv);
+  }
+
   return (
     <Wrapper>
       {/* Summary bar */}
@@ -342,7 +384,15 @@ export default function BudgetTracker({ eventId, eventBudget }: BudgetTrackerPro
         <PrimaryBtn onClick={() => setAddOpen((v) => !v)}>
           {addOpen ? 'Cancel' : '+ Add Expense'}
         </PrimaryBtn>
+        <PrimaryBtn
+          onClick={exportExpenses}
+          disabled={expenses.length === 0}
+          style={{ background: '#fff', color: '#7c3aed', border: '1.5px solid #7c3aed' }}
+        >
+          Export CSV
+        </PrimaryBtn>
       </FormRow>
+      {receiptError && <ErrorMsg>{receiptError}</ErrorMsg>}
 
       {/* Add expense form */}
       {addOpen && (
@@ -400,6 +450,7 @@ export default function BudgetTracker({ eventId, eventBudget }: BudgetTrackerPro
                 <Th>Category</Th>
                 <Th>Amount</Th>
                 <Th>Paid</Th>
+                <Th>Receipt</Th>
                 <Th></Th>
               </tr>
             </thead>
@@ -416,6 +467,35 @@ export default function BudgetTracker({ eventId, eventBudget }: BudgetTrackerPro
                       onChange={() => handlePaidToggle(exp)}
                       title="Toggle paid status"
                     />
+                  </Td>
+                  <Td>
+                    {exp.receiptPath ? (
+                      <a href={mediaUrl(exp.receiptPath)} target="_blank" rel="noopener noreferrer"
+                         style={{ fontSize: '0.78rem', color: '#7c3aed', fontWeight: 600 }}>
+                        View
+                      </a>
+                    ) : (
+                      <>
+                        <button
+                          type="button"
+                          onClick={() => receiptRefs.current[exp.id]?.click()}
+                          disabled={uploadingId === exp.id}
+                          style={{ background: 'none', border: 'none', color: '#7c3aed', cursor: 'pointer', fontSize: '0.78rem', fontWeight: 600, padding: 0 }}
+                        >
+                          {uploadingId === exp.id ? 'Uploading…' : '📎 Attach'}
+                        </button>
+                        <input
+                          ref={(el) => { receiptRefs.current[exp.id] = el; }}
+                          type="file"
+                          accept="image/*,application/pdf"
+                          style={{ display: 'none' }}
+                          onChange={(e) => {
+                            const f = e.target.files?.[0];
+                            if (f) handleReceiptUpload(exp.id, f);
+                          }}
+                        />
+                      </>
+                    )}
                   </Td>
                   <Td>
                     <DeleteBtn onClick={() => handleDelete(exp.id)} title="Delete expense">

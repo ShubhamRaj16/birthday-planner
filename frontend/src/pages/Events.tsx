@@ -196,6 +196,28 @@ const EmptyState = styled.div`
   color: #6b7280;
 `;
 
+const FilterTabs = styled.div`
+  display: flex;
+  gap: 0.5rem;
+  margin-bottom: 1rem;
+  flex-wrap: wrap;
+`;
+
+const FilterTab = styled.button<{ $active: boolean }>`
+  padding: 0.35rem 0.85rem;
+  border-radius: 999px;
+  font-size: 0.82rem;
+  font-weight: 600;
+  cursor: pointer;
+  border: 1.5px solid ${({ $active }) => ($active ? '#7c3aed' : '#e5e7eb')};
+  background: ${({ $active }) => ($active ? '#7c3aed' : '#fff')};
+  color: ${({ $active }) => ($active ? '#fff' : '#6b7280')};
+  &:hover { border-color: #7c3aed; }
+`;
+
+const FILTERS = ['All', 'Draft', 'Active', 'Completed'] as const;
+type EventFilter = (typeof FILTERS)[number];
+
 const EMPTY_FORM = {
   childId: '',
   date: '',
@@ -211,6 +233,7 @@ export default function Events() {
   const { items: children } = useAppSelector((state) => state.children);
   const [showForm, setShowForm] = useState(false);
   const [form, setForm] = useState(EMPTY_FORM);
+  const [filter, setFilter] = useState<EventFilter>('All'); // SCRUM-45
 
   useEffect(() => {
     dispatch(fetchEvents());
@@ -246,7 +269,12 @@ export default function Events() {
     }
   }
 
-  const sorted = [...events].sort((a, b) => new Date(a.date).getTime() - new Date(b.date).getTime());
+  const sorted = [...events]
+    .filter((e) => filter === 'All' || e.status === filter)
+    .sort((a, b) => new Date(a.date).getTime() - new Date(b.date).getTime());
+
+  const countFor = (f: EventFilter) =>
+    f === 'All' ? events.length : events.filter((e) => e.status === f).length;
 
   return (
     <div>
@@ -344,6 +372,16 @@ export default function Events() {
             </FormActions>
           </form>
         </FormPanel>
+      )}
+
+      {events.length > 0 && (
+        <FilterTabs>
+          {FILTERS.map((f) => (
+            <FilterTab key={f} $active={filter === f} onClick={() => setFilter(f)}>
+              {f} ({countFor(f)})
+            </FilterTab>
+          ))}
+        </FilterTabs>
       )}
 
       {loading && !showForm && <p style={{ color: '#6b7280' }}>Loading events...</p>}
