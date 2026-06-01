@@ -1,0 +1,1 @@
+{"nodes": [{"id": "client_errorhandler_setuperrorhandling", "label": "setupErrorHandling (chunk-load retry)", "file_type": "code", "source_file": "frontend/src/client/errorHandler.ts", "source_location": null, "source_url": null, "captured_at": null, "author": null, "contributor": null}], "edges": [], "hyperedges": []}
