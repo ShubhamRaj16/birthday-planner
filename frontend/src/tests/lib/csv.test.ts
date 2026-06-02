@@ -1,5 +1,5 @@
-import { describe, it, expect } from 'vitest';
-import { toCsv, fileSlug } from '../../lib/csv';
+import { describe, it, expect, vi } from 'vitest';
+import { toCsv, fileSlug, downloadCsv } from '../../lib/csv';
 
 interface Row { name: string; note: string; }
 
@@ -33,5 +33,23 @@ describe('fileSlug', () => {
   it('defaults to "export" for empty input', () => {
     expect(fileSlug('')).toBe('export');
     expect(fileSlug(null)).toBe('export');
+  });
+});
+
+describe('downloadCsv', () => {
+  it('creates a blob URL and triggers an anchor download', () => {
+    const createUrl = vi.fn(() => 'blob:fake');
+    const revokeUrl = vi.fn();
+    // jsdom does not implement these on URL — stub them.
+    (URL as unknown as { createObjectURL: unknown }).createObjectURL = createUrl;
+    (URL as unknown as { revokeObjectURL: unknown }).revokeObjectURL = revokeUrl;
+    const clickSpy = vi.spyOn(HTMLAnchorElement.prototype, 'click').mockImplementation(() => {});
+
+    downloadCsv('guests.csv', 'Name\nAlice');
+
+    expect(createUrl).toHaveBeenCalledOnce();
+    expect(clickSpy).toHaveBeenCalledOnce();
+    expect(revokeUrl).toHaveBeenCalledWith('blob:fake');
+    clickSpy.mockRestore();
   });
 });

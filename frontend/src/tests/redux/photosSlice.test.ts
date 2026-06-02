@@ -61,3 +61,17 @@ describe('photosSlice', () => {
     expect(store.getState().photos.error).toBe('boom');
   });
 });
+
+describe('photosSlice rejected paths', () => {
+  it('sets error on upload/update/delete rejection', async () => {
+    const store = makeStore();
+    mockApi.post.mockRejectedValue(new Error('x'));
+    const fd = new FormData(); fd.append('photo', new File(['x'], 'p.png', { type: 'image/png' }));
+    await store.dispatch(uploadPhoto({ eventId: 42, formData: fd }));
+    mockApi.put.mockRejectedValue(new Error('x'));
+    await store.dispatch(updatePhoto({ eventId: 42, photoId: 1, data: {} }));
+    mockApi.delete.mockRejectedValue(new Error('x'));
+    await store.dispatch(deletePhoto({ eventId: 42, photoId: 1 }));
+    expect(store.getState().photos.error).toBeTruthy();
+  });
+});

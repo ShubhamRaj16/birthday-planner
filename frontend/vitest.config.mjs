@@ -20,13 +20,12 @@ export default defineConfig({
         'src/api/http.ts', // transport config (axios.create); behaviourless
       ],
       thresholds: {
-        // Ratchet gate: set to the CURRENT measured floor so CI is green and can
-        // never regress. Raise toward 90% as the next increment adds tests for the
-        // untested thunks (eventsSlice fetchEvent/fetchUpcoming/activateEvent,
-        // rejected branches) and csv.downloadCsv. Never lower these.
-        'src/redux/**/*.ts': { lines: 77, functions: 75 },
-        'src/api/**/*.ts': { lines: 90 },
-        'src/lib/**/*.ts': { lines: 70 },
+        // Logic layer gated at 95% lines. Glob targets slices/ (not store.ts /
+        // hooks.ts, which are DI/typing wiring like api/http.ts). Components/pages
+        // stay ungated until T2/T3 land their tests. Never lower — only raise.
+        'src/redux/slices/**/*.ts': { lines: 95, functions: 95 },
+        'src/api/**/*.ts': { lines: 95 },
+        'src/lib/**/*.ts': { lines: 95 },
       },
     },
   },

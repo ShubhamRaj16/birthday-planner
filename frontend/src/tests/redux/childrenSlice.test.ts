@@ -60,3 +60,17 @@ describe('childrenSlice', () => {
     expect(store.getState().children.error).toBeTruthy();
   });
 });
+
+describe('childrenSlice rejected paths', () => {
+  it('sets error on create/update/delete rejection', async () => {
+    const store = makeStore();
+    mockApi.post.mockRejectedValue(new Error('x'));
+    const fd = new FormData(); fd.append('name', 'M');
+    await store.dispatch(createChild(fd));
+    mockApi.put.mockRejectedValue(new Error('x'));
+    await store.dispatch(updateChild({ id: 1, data: { name: 'N' } }));
+    mockApi.delete.mockRejectedValue(new Error('x'));
+    await store.dispatch(deleteChild(1));
+    expect(store.getState().children.error).toBeTruthy();
+  });
+});

@@ -51,3 +51,18 @@ describe('giftsSlice', () => {
     expect(store.getState().gifts.byEventId[42]).toHaveLength(0);
   });
 });
+
+describe('giftsSlice rejected paths', () => {
+  it('sets error on fetch/create/update/delete rejection', async () => {
+    const store = makeStore();
+    mockApi.get.mockRejectedValue(new Error('x'));
+    await store.dispatch(fetchGifts(42));
+    mockApi.post.mockRejectedValue(new Error('x'));
+    await store.dispatch(createGift({ eventId: 42, data: { name: 'L' } }));
+    mockApi.put.mockRejectedValue(new Error('x'));
+    await store.dispatch(updateGift({ eventId: 42, id: 1, data: {} }));
+    mockApi.delete.mockRejectedValue(new Error('x'));
+    await store.dispatch(deleteGift({ eventId: 42, id: 1 }));
+    expect(store.getState().gifts.error).toBeTruthy();
+  });
+});

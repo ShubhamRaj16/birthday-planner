@@ -57,3 +57,18 @@ describe('expensesSlice', () => {
     expect(store.getState().expenses.byEventId[42]).toHaveLength(0);
   });
 });
+
+describe('expensesSlice rejected paths', () => {
+  it('sets error on fetch/create/update/delete rejection', async () => {
+    const store = makeStore();
+    mockApi.get.mockRejectedValue(new Error('x'));
+    await store.dispatch(fetchExpenses(42));
+    mockApi.post.mockRejectedValue(new Error('x'));
+    await store.dispatch(createExpense({ eventId: 42, data: { label: 'C', amount: 1, category: 'cake' } }));
+    mockApi.put.mockRejectedValue(new Error('x'));
+    await store.dispatch(updateExpense({ eventId: 42, id: 1, data: {} }));
+    mockApi.delete.mockRejectedValue(new Error('x'));
+    await store.dispatch(deleteExpense({ eventId: 42, id: 1 }));
+    expect(store.getState().expenses.error).toBeTruthy();
+  });
+});

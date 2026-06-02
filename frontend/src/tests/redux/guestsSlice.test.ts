@@ -58,3 +58,20 @@ describe('guestsSlice', () => {
     expect(mockApi.post).toHaveBeenCalledWith('/events/42/guests/bulk-import', { guests: [{ name: 'A' }, { name: 'B' }] });
   });
 });
+
+describe('guestsSlice rejected paths', () => {
+  it('sets error on fetch/create/update/delete/bulkImport rejection', async () => {
+    const store = makeStore();
+    mockApi.get.mockRejectedValue(new Error('x'));
+    await store.dispatch(fetchGuests(42));
+    mockApi.post.mockRejectedValue(new Error('x'));
+    await store.dispatch(createGuest({ eventId: 42, data: { name: 'N' } }));
+    mockApi.put.mockRejectedValue(new Error('x'));
+    await store.dispatch(updateGuest({ eventId: 42, id: 1, data: {} }));
+    mockApi.delete.mockRejectedValue(new Error('x'));
+    await store.dispatch(deleteGuest({ eventId: 42, id: 1 }));
+    mockApi.post.mockRejectedValue(new Error('x'));
+    await store.dispatch(bulkImportGuests({ eventId: 42, guests: [{ name: 'A' }] }));
+    expect(store.getState().guests.error).toBeTruthy();
+  });
+});

@@ -67,3 +67,18 @@ describe('remindersSlice', () => {
     expect(store.getState().reminders.unreadCount).toBe(1);
   });
 });
+
+describe('remindersSlice rejected paths', () => {
+  it('sets error on fetch/create/delete/markRead rejection', async () => {
+    const store = makeStore();
+    mockApi.get.mockRejectedValue(new Error('x'));
+    await store.dispatch(fetchReminders());
+    mockApi.post.mockRejectedValue(new Error('x'));
+    await store.dispatch(createReminder({ label: 'X', triggerAt: '2026-06-20T10:00:00Z' }));
+    mockApi.delete.mockRejectedValue(new Error('x'));
+    await store.dispatch(deleteReminder(1));
+    mockApi.post.mockRejectedValue(new Error('x'));
+    await store.dispatch(markRead([1]));
+    expect(store.getState().reminders.error).toBeTruthy();
+  });
+});
