@@ -7,7 +7,7 @@ STAGED=$(git diff --cached --name-only)
 if echo "$STAGED" | grep -q "^backend/src/.*\.js$"; then
   echo "[pre-commit] Linting backend..."
   cd backend
-  ESLINT_USE_FLAT_CONFIG=false ./node_modules/.bin/eslint 'src/**/*.js'
+  ESLINT_USE_FLAT_CONFIG=false ./node_modules/.bin/eslint 'src/**/*.{ts,js}'
   cd ..
 fi
 
@@ -15,7 +15,7 @@ fi
 if echo "$STAGED" | grep -qE "^frontend/src/.*\.(js|jsx)$"; then
   echo "[pre-commit] Linting frontend..."
   cd frontend
-  ESLINT_USE_FLAT_CONFIG=false ./node_modules/.bin/eslint 'src/**/*.{js,jsx}'
+  ESLINT_USE_FLAT_CONFIG=false ./node_modules/.bin/eslint 'src/**/*.{ts,tsx,js,jsx}'
   cd ..
 fi
 
