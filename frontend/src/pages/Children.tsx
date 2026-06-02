@@ -3,7 +3,7 @@ import { useAppDispatch, useAppSelector } from '../redux/hooks';
 import styled from 'styled-components';
 import dayjs from 'dayjs';
 import { fetchChildren, createChild, updateChild, deleteChild } from '../redux/slices/childrenSlice';
-import { mediaUrl } from '../lib/apiClient';
+import { mediaUrl } from '../lib/media';
 
 const PageTitle = styled.h1`
   font-size: 1.6rem;

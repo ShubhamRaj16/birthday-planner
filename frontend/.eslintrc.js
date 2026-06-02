@@ -71,6 +71,30 @@ module.exports = {
       },
     },
     {
+      // DIP transport seam: UI (components + pages) must call an `api/*.api.ts`
+      // repository module, never axios or the raw http instance directly.
+      files: ['src/components/**/*.{ts,tsx}', 'src/pages/**/*.{ts,tsx}'],
+      rules: {
+        'no-restricted-imports': [
+          'error',
+          {
+            paths: [
+              {
+                name: 'axios',
+                message: 'Do not import axios in the UI. Call an api/*.api.ts repository module instead.',
+              },
+            ],
+            patterns: [
+              {
+                group: ['**/api/http', '**/lib/apiClient'],
+                message: 'UI must depend on an api/*.api.ts repository, not the raw http transport instance.',
+              },
+            ],
+          },
+        ],
+      },
+    },
+    {
       // Webpack config and scripts are CJS
       files: ['config/**/*.js', 'scripts/**/*.js'],
       parserOptions: { sourceType: 'script' },

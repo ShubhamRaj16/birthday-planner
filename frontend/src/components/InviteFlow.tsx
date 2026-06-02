@@ -2,7 +2,9 @@ import { useEffect, useState, type ChangeEvent } from 'react';
 import { useAppDispatch, useAppSelector } from '../redux/hooks';
 import styled from 'styled-components';
 import dayjs from 'dayjs';
-import apiClient, { mediaUrl } from '../lib/apiClient';
+import { mediaUrl } from '../lib/media';
+import { whatsappApi } from '../api/whatsapp.api';
+import { eventsApi } from '../api/events.api';
 import { getApiError } from '../lib/apiError';
 import { updateEvent } from '../redux/slices/eventsSlice';
 import { fetchGuests } from '../redux/slices/guestsSlice';
@@ -353,9 +355,8 @@ export default function InviteFlow({ eventId, event, onRefresh, suggestedTemplat
   // Fetch default template if event has none
   useEffect(() => {
     if (!event.messageTemplate && !templateLoaded) {
-      apiClient.get('/whatsapp/default-template')
-        .then((res) => {
-          const t = res.data?.data?.template;
+      whatsappApi.fetchDefaultTemplate()
+        .then((t) => {
           if (t) {
             setTemplate(t);
             setTemplateLoaded(true);
@@ -391,11 +392,7 @@ export default function InviteFlow({ eventId, event, onRefresh, suggestedTemplat
     setUploadError('');
     setUploadStatus('uploading');
     try {
-      const formData = new FormData();
-      formData.append('card', file);
-      await apiClient.post(`/events/${eventId}/invite-card`, formData, {
-        headers: { 'Content-Type': 'multipart/form-data' },
-      });
+      await eventsApi.uploadInviteCard(eventId, file);
       setUploadStatus('done');
       setShowReplaceInput(false);
       if (onRefresh) onRefresh();
@@ -449,8 +446,8 @@ export default function InviteFlow({ eventId, event, onRefresh, suggestedTemplat
     setPreviewError('');
     setPreviewMsg('');
     try {
-      const res = await apiClient.post('/whatsapp/preview', { eventId, template });
-      setPreviewMsg(res.data?.data?.message || '');
+      const message = await whatsappApi.previewMessage(eventId, template);
+      setPreviewMsg(message);
     } catch (err) {
       setPreviewError(getApiError(err) || 'Preview failed.');
     } finally {
@@ -511,8 +508,7 @@ export default function InviteFlow({ eventId, event, onRefresh, suggestedTemplat
       const guest = selectedGuests[i];
       setSendProgress(`Sending ${i + 1} of ${selectedGuests.length}...`);
       try {
-        const res = await apiClient.post('/whatsapp/link', { eventId, guestId: guest.id });
-        const link = res.data?.data?.link;
+        const link = await whatsappApi.buildLink(eventId, guest.id);
         if (link) {
           window.open(link, '_blank', 'noopener,noreferrer');
         }

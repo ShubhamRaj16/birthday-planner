@@ -1,52 +1,40 @@
-import { Router, type Request, type Response, type NextFunction } from 'express';
+import { Router } from 'express';
 import * as svc from '../services/guestService';
+import { asyncHandler } from '../http/asyncHandler';
+import { sendOk, sendErr } from '../http/respond';
 
 const router = Router({ mergeParams: true });
 
-router.get('/', async (req: Request, res: Response, next: NextFunction) => {
-  try {
-    const data = await svc.listGuests(Number(req.params.eventId));
-    res.json({ data, error: null, meta: { count: data.length } });
-  } catch (e) { next(e); }
-});
+router.get('/', asyncHandler(async (req, res) => {
+  const data = await svc.listGuests(Number(req.params.eventId));
+  sendOk(res, data, { count: data.length });
+}));
 
-router.post('/', async (req: Request, res: Response, next: NextFunction) => {
-  try {
-    const { name } = req.body;
-    if (!name) {
-      res.status(400).json({ data: null, error: { code: 'VALIDATION', message: 'name is required' }, meta: {} });
-      return;
-    }
-    const data = await svc.createGuest(Number(req.params.eventId), req.body);
-    res.status(201).json({ data, error: null, meta: {} });
-  } catch (e) { next(e); }
-});
+router.post('/', asyncHandler(async (req, res) => {
+  const { name } = req.body;
+  if (!name) return sendErr(res, 400, 'VALIDATION', 'name is required');
+  const data = await svc.createGuest(Number(req.params.eventId), req.body);
+  sendOk(res, data, {}, 201);
+}));
 
-router.put('/:id', async (req: Request, res: Response, next: NextFunction) => {
-  try {
-    const data = await svc.updateGuest(Number(req.params.id), req.body);
-    res.json({ data, error: null, meta: {} });
-  } catch (e) { next(e); }
-});
+router.put('/:id', asyncHandler(async (req, res) => {
+  const data = await svc.updateGuest(Number(req.params.id), req.body);
+  sendOk(res, data);
+}));
 
-router.delete('/:id', async (req: Request, res: Response, next: NextFunction) => {
-  try {
-    await svc.deleteGuest(Number(req.params.id));
-    res.json({ data: { deleted: true }, error: null, meta: {} });
-  } catch (e) { next(e); }
-});
+router.delete('/:id', asyncHandler(async (req, res) => {
+  await svc.deleteGuest(Number(req.params.id));
+  sendOk(res, { deleted: true });
+}));
 
 // POST /bulk-import — body: { guests: [{ name, phone, ageGroup, dietary }] }
-router.post('/bulk-import', async (req: Request, res: Response, next: NextFunction) => {
-  try {
-    const { guests } = req.body;
-    if (!Array.isArray(guests) || guests.length === 0) {
-      res.status(400).json({ data: null, error: { code: 'VALIDATION', message: 'guests array required' }, meta: {} });
-      return;
-    }
-    const data = await svc.bulkImportGuests(Number(req.params.eventId), guests);
-    res.status(201).json({ data, error: null, meta: { count: data.count } });
-  } catch (e) { next(e); }
-});
+router.post('/bulk-import', asyncHandler(async (req, res) => {
+  const { guests } = req.body;
+  if (!Array.isArray(guests) || guests.length === 0) {
+    return sendErr(res, 400, 'VALIDATION', 'guests array required');
+  }
+  const data = await svc.bulkImportGuests(Number(req.params.eventId), guests);
+  sendOk(res, data, { count: data.count }, 201);
+}));
 
 export default router;

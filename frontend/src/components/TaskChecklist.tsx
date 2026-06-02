@@ -1,7 +1,7 @@
 import { useState, type FormEvent } from 'react';
 import styled from 'styled-components';
 import dayjs from 'dayjs';
-import apiClient from '../lib/apiClient';
+import { tasksApi } from '../api/tasks.api';
 import { getApiError } from '../lib/apiError';
 import type { Task } from '../types';
 
@@ -275,7 +275,7 @@ export default function TaskChecklist({ eventId, tasks = [], onRefresh }: TaskCh
 
   async function handleToggle(task: TaskChecklistTask) {
     try {
-      await apiClient.put(`/tasks/${task.id}`, { done: !task.done });
+      await tasksApi.setTaskDone(task.id, !task.done);
       onRefresh && onRefresh();
     } catch (err) {
       showOpError(getApiError(err) || 'Failed to update task.');
@@ -285,7 +285,7 @@ export default function TaskChecklist({ eventId, tasks = [], onRefresh }: TaskCh
   async function handleDelete(taskId: number) {
     if (!window.confirm('Delete this task?')) return;
     try {
-      await apiClient.delete(`/events/${eventId}/tasks/${taskId}`);
+      await tasksApi.deleteTask(eventId, taskId);
       onRefresh && onRefresh();
     } catch (err) {
       showOpError(getApiError(err) || 'Failed to delete task.');
@@ -298,7 +298,7 @@ export default function TaskChecklist({ eventId, tasks = [], onRefresh }: TaskCh
     setFormError('');
     setAdding(true);
     try {
-      await apiClient.post(`/events/${eventId}/tasks`, {
+      await tasksApi.createTask(eventId, {
         title: form.title.trim(),
         category: form.category,
         dueDate: form.dueDate || undefined,
@@ -317,7 +317,7 @@ export default function TaskChecklist({ eventId, tasks = [], onRefresh }: TaskCh
     if (!window.confirm('Reset tasks to default checklist? This will replace existing tasks.')) return;
     setResetting(true);
     try {
-      await apiClient.post(`/events/${eventId}/tasks/reset-defaults`);
+      await tasksApi.resetDefaults(eventId);
       onRefresh && onRefresh();
     } catch (err) {
       console.error('Reset defaults failed:', getApiError(err));

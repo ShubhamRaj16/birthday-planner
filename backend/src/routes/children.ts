@@ -1,11 +1,14 @@
-import { Router, type Request, type Response, type NextFunction } from 'express';
+import { Router } from 'express';
 import multer from 'multer';
 import path from 'path';
 import * as svc from '../services/childService';
+import { asyncHandler } from '../http/asyncHandler';
+import { sendOk, sendErr } from '../http/respond';
 import type { MulterRequest } from '../types';
 
 const router = Router();
 
+// NOTE: multer config stays inline for Phase 1; moves to uploads/ in Phase 3.
 const avatarStorage = multer.diskStorage({
   destination: path.join(__dirname, '../../../uploads/avatars'),
   filename: (req, file, cb) => {
@@ -15,63 +18,42 @@ const avatarStorage = multer.diskStorage({
 });
 const upload = multer({ storage: avatarStorage, limits: { fileSize: 10 * 1024 * 1024 } });
 
-router.get('/', async (_req: Request, res: Response, next: NextFunction) => {
-  try {
-    const data = await svc.listChildren();
-    res.json({ data, error: null, meta: { count: data.length } });
-  } catch (e) { next(e); }
-});
+router.get('/', asyncHandler(async (_req, res) => {
+  const data = await svc.listChildren();
+  sendOk(res, data, { count: data.length });
+}));
 
-router.get('/:id', async (req: Request, res: Response, next: NextFunction) => {
-  try {
-    const data = await svc.getChild(Number(req.params.id));
-    if (!data) {
-      res.status(404).json({ data: null, error: { code: 'NOT_FOUND', message: 'Child not found' }, meta: {} });
-      return;
-    }
-    res.json({ data, error: null, meta: {} });
-  } catch (e) { next(e); }
-});
+router.get('/:id', asyncHandler(async (req, res) => {
+  const data = await svc.getChild(Number(req.params.id));
+  if (!data) return sendErr(res, 404, 'NOT_FOUND', 'Child not found');
+  sendOk(res, data);
+}));
 
-router.post('/', upload.single('avatar'), async (req: MulterRequest, res: Response, next: NextFunction) => {
-  try {
-    const { name, dob } = req.body;
-    if (!name || !dob) {
-      res.status(400).json({ data: null, error: { code: 'VALIDATION', message: 'name and dob are required' }, meta: {} });
-      return;
-    }
-    const photoPath = req.file ? `/uploads/avatars/${req.file.filename}` : undefined;
-    const data = await svc.createChild({ ...req.body, photo: photoPath });
-    res.status(201).json({ data, error: null, meta: {} });
-  } catch (e) { next(e); }
-});
+router.post('/', upload.single('avatar'), asyncHandler<MulterRequest>(async (req, res) => {
+  const { name, dob } = req.body;
+  if (!name || !dob) return sendErr(res, 400, 'VALIDATION', 'name and dob are required');
+  const photoPath = req.file ? `/uploads/avatars/${req.file.filename}` : undefined;
+  const data = await svc.createChild({ ...req.body, photo: photoPath });
+  sendOk(res, data, {}, 201);
+}));
 
-router.put('/:id', upload.single('avatar'), async (req: MulterRequest, res: Response, next: NextFunction) => {
-  try {
-    const updateData = { ...req.body };
-    if (req.file) updateData.photo = `/uploads/avatars/${req.file.filename}`;
-    const data = await svc.updateChild(Number(req.params.id), updateData);
-    res.json({ data, error: null, meta: {} });
-  } catch (e) { next(e); }
-});
+router.put('/:id', upload.single('avatar'), asyncHandler<MulterRequest>(async (req, res) => {
+  const updateData = { ...req.body };
+  if (req.file) updateData.photo = `/uploads/avatars/${req.file.filename}`;
+  const data = await svc.updateChild(Number(req.params.id), updateData);
+  sendOk(res, data);
+}));
 
-router.delete('/:id', async (req: Request, res: Response, next: NextFunction) => {
-  try {
-    await svc.deleteChild(Number(req.params.id));
-    res.json({ data: { deleted: true }, error: null, meta: {} });
-  } catch (e) { next(e); }
-});
+router.delete('/:id', asyncHandler(async (req, res) => {
+  await svc.deleteChild(Number(req.params.id));
+  sendOk(res, { deleted: true });
+}));
 
-router.post('/:id/avatar', upload.single('avatar'), async (req: MulterRequest, res: Response, next: NextFunction) => {
-  try {
-    if (!req.file) {
-      res.status(400).json({ data: null, error: { code: 'VALIDATION', message: 'avatar file required' }, meta: {} });
-      return;
-    }
-    const photoPath = `/uploads/avatars/${req.file.filename}`;
-    const data = await svc.updateAvatar(Number(req.params.id), photoPath);
-    res.json({ data, error: null, meta: {} });
-  } catch (e) { next(e); }
-});
+router.post('/:id/avatar', upload.single('avatar'), asyncHandler<MulterRequest>(async (req, res) => {
+  if (!req.file) return sendErr(res, 400, 'VALIDATION', 'avatar file required');
+  const photoPath = `/uploads/avatars/${req.file.filename}`;
+  const data = await svc.updateAvatar(Number(req.params.id), photoPath);
+  sendOk(res, data);
+}));
 
 export default router;

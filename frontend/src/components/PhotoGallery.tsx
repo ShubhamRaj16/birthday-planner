@@ -2,7 +2,7 @@ import { useEffect, useRef, useState, type ChangeEvent } from 'react';
 import { useAppDispatch, useAppSelector } from '../redux/hooks';
 import styled from 'styled-components';
 import { fetchPhotos, uploadPhoto, updatePhoto, deletePhoto } from '../redux/slices/photosSlice';
-import { mediaUrl } from '../lib/apiClient';
+import { mediaUrl } from '../lib/media';
 
 interface PhotoGalleryProps {
   eventId: number;

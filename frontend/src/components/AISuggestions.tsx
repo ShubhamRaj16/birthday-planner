@@ -1,11 +1,12 @@
 import { useState } from 'react';
 import styled from 'styled-components';
-import apiClient from '../lib/apiClient';
+import { aiApi } from '../api/ai.api';
+import { giftsApi } from '../api/gifts.api';
 import { getApiError } from '../lib/apiError';
 
-// Inline thunk for saving a gift suggestion — reuses the gifts API
+// Save an AI gift suggestion via the gifts repository.
 async function saveGiftSuggestion(eventId: number, name: string): Promise<void> {
-  await apiClient.post(`/events/${eventId}/gifts`, { name, source: 'ai' });
+  await giftsApi.createGift(eventId, { name, source: 'ai' });
 }
 
 interface AISuggestionsProps {
@@ -145,8 +146,8 @@ export default function AISuggestions({ eventId, onUseTemplate }: AISuggestionsP
     setErr(null);
     setSuggestions([]);
     try {
-      const res = await apiClient.post(`/events/${eventId}/ai/suggest`, { type: activeType });
-      setSuggestions(res.data.data.suggestions || []);
+      const result = await aiApi.getSuggestions(eventId, activeType);
+      setSuggestions(result);
     } catch (e) {
       setErr(getApiError(e) || 'AI request failed');
     } finally {

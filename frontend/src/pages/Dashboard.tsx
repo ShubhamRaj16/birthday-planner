@@ -3,7 +3,7 @@ import { useAppDispatch, useAppSelector } from '../redux/hooks';
 import { Link } from 'react-router-dom';
 import styled from 'styled-components';
 import dayjs from 'dayjs';
-import { mediaUrl } from '../lib/apiClient';
+import { mediaUrl } from '../lib/media';
 import { fetchChildren } from '../redux/slices/childrenSlice';
 import { fetchUpcoming } from '../redux/slices/eventsSlice';
 import type { Child, EventStatus } from '../types';

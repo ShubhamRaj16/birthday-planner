@@ -3,7 +3,8 @@ import { useAppDispatch, useAppSelector } from '../redux/hooks';
 import styled from 'styled-components';
 import { BarChart, Bar, XAxis, YAxis, Tooltip, ResponsiveContainer } from 'recharts';
 import type { Expense } from '../types';
-import apiClient, { mediaUrl } from '../lib/apiClient';
+import { mediaUrl } from '../lib/media';
+import { expensesApi } from '../api/expenses.api';
 import { toCsv, downloadCsv, fileSlug } from '../lib/csv';
 import {
   fetchExpenses,
@@ -312,11 +313,7 @@ export default function BudgetTracker({ eventId, eventBudget, eventTheme }: Budg
     setReceiptError('');
     setUploadingId(expenseId);
     try {
-      const fd = new FormData();
-      fd.append('receipt', file);
-      await apiClient.post(`/events/${eventId}/expenses/${expenseId}/receipt`, fd, {
-        headers: { 'Content-Type': 'multipart/form-data' },
-      });
+      await expensesApi.uploadReceipt(eventId, expenseId, file);
       dispatch(fetchExpenses(eventId));
     } catch {
       setReceiptError('Receipt upload failed.');

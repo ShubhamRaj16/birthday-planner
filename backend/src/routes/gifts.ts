@@ -1,39 +1,30 @@
-import { Router, type Request, type Response, type NextFunction } from 'express';
+import { Router } from 'express';
 import * as svc from '../services/giftService';
+import { asyncHandler } from '../http/asyncHandler';
+import { sendOk, sendErr } from '../http/respond';
 
 const router = Router({ mergeParams: true });
 
-router.get('/', async (req: Request, res: Response, next: NextFunction) => {
-  try {
-    const data = await svc.listGifts(Number(req.params.eventId));
-    res.json({ data, error: null, meta: { count: data.length } });
-  } catch (e) { next(e); }
-});
+router.get('/', asyncHandler(async (req, res) => {
+  const data = await svc.listGifts(Number(req.params.eventId));
+  sendOk(res, data, { count: data.length });
+}));
 
-router.post('/', async (req: Request, res: Response, next: NextFunction) => {
-  try {
-    const { name } = req.body;
-    if (!name) {
-      res.status(400).json({ data: null, error: { code: 'VALIDATION', message: 'name is required' }, meta: {} });
-      return;
-    }
-    const data = await svc.createGift(Number(req.params.eventId), req.body);
-    res.status(201).json({ data, error: null, meta: {} });
-  } catch (e) { next(e); }
-});
+router.post('/', asyncHandler(async (req, res) => {
+  const { name } = req.body;
+  if (!name) return sendErr(res, 400, 'VALIDATION', 'name is required');
+  const data = await svc.createGift(Number(req.params.eventId), req.body);
+  sendOk(res, data, {}, 201);
+}));
 
-router.put('/:id', async (req: Request, res: Response, next: NextFunction) => {
-  try {
-    const data = await svc.updateGift(Number(req.params.id), req.body);
-    res.json({ data, error: null, meta: {} });
-  } catch (e) { next(e); }
-});
+router.put('/:id', asyncHandler(async (req, res) => {
+  const data = await svc.updateGift(Number(req.params.id), req.body);
+  sendOk(res, data);
+}));
 
-router.delete('/:id', async (req: Request, res: Response, next: NextFunction) => {
-  try {
-    await svc.deleteGift(Number(req.params.id));
-    res.json({ data: { deleted: true }, error: null, meta: {} });
-  } catch (e) { next(e); }
-});
+router.delete('/:id', asyncHandler(async (req, res) => {
+  await svc.deleteGift(Number(req.params.id));
+  sendOk(res, { deleted: true });
+}));
 
 export default router;
