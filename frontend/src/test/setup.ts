@@ -19,4 +19,7 @@ vi.mock('axios', () => ({
     put: vi.fn(),
     delete: vi.fn(),
   },
+  // Named export used by lib/apiError.ts. Detects AxiosError by its flag so
+  // getApiError() works under the mock instead of throwing "isAxiosError is not a function".
+  isAxiosError: (e) => Boolean(e && e.isAxiosError),
 }));
