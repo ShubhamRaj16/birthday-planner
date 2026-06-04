@@ -1,48 +1,18 @@
 const path = require('path');
 const webpack = require('webpack');
+const HtmlWebpackPlugin = require('html-webpack-plugin');
 
-class AssetManifestPlugin {
-  apply(compiler) {
-    compiler.hooks.thisCompilation.tap('AssetManifestPlugin', (compilation) => {
-      compilation.hooks.processAssets.tap(
-        {
-          name: 'AssetManifestPlugin',
-          stage: compiler.webpack.Compilation.PROCESS_ASSETS_STAGE_SUMMARIZE,
-        },
-        () => {
-          const entrypoint = compilation.entrypoints.get('main');
-          const entrypoints = entrypoint
-            ? entrypoint
-                .getFiles()
-                .filter((file) => file.endsWith('.js') || file.endsWith('.css'))
-            : [];
-
-          const manifest = {
-            entrypoints,
-            assets: Object.fromEntries(
-              compilation
-                .getAssets()
-                .map((asset) => [asset.name, `${compiler.options.output.publicPath}${asset.name}`])
-            ),
-          };
-
-          compilation.emitAsset(
-            'asset-manifest.json',
-            new compiler.webpack.sources.RawSource(JSON.stringify(manifest, null, 2))
-          );
-        }
-      );
-    });
-  }
-}
+// @birthday-planner/ui is consumed as TypeScript source (no build step), so its
+// files live outside this app and must be transpiled by our babel-loader too.
+const uiSrc = path.resolve(__dirname, '../../../packages/ui/src');
 
 module.exports = {
-  entry: './src/client/index.tsx',
+  entry: './src/index.tsx',
   output: {
     filename: 'js/[name].[contenthash:8].js',
     chunkFilename: 'js/[name].[contenthash:8].chunk.js',
     path: path.resolve(__dirname, '../dist/client'),
-    publicPath: '/static/',
+    publicPath: '/',
     clean: true,
   },
   optimization: {
@@ -74,9 +44,24 @@ module.exports = {
     rules: [
       {
         test: /\.[jt]sx?$/,
-        exclude: /node_modules/,
+        // Transpile this app's src AND the shared ui package source.
+        include: [path.resolve(__dirname, '../src'), uiSrc],
         use: {
           loader: 'babel-loader',
+          options: {
+            // Inline config so it applies uniformly to files in both packages,
+            // regardless of where each .babelrc would otherwise be resolved.
+            babelrc: false,
+            configFile: false,
+            presets: [
+              ['@babel/preset-env', { targets: 'defaults' }],
+              ['@babel/preset-react', { runtime: 'automatic' }],
+              '@babel/preset-typescript',
+            ],
+            plugins: [
+              ['babel-plugin-styled-components', { displayName: true, fileName: true }],
+            ],
+          },
         },
       },
       {
@@ -87,6 +72,9 @@ module.exports = {
   },
   resolve: {
     extensions: ['.tsx', '.ts', '.js', '.jsx'],
+    alias: {
+      '@birthday-planner/ui': path.resolve(uiSrc, 'index.ts'),
+    },
   },
   plugins: [
     new webpack.DefinePlugin({
@@ -96,6 +84,9 @@ module.exports = {
       'process.env.REACT_APP_SC_ATTR': JSON.stringify(process.env.REACT_APP_SC_ATTR),
       'process.env.SC_ATTR': JSON.stringify(process.env.SC_ATTR),
     }),
-    new AssetManifestPlugin(),
+    new HtmlWebpackPlugin({
+      template: path.resolve(__dirname, '../public/index.html'),
+      inject: 'body',
+    }),
   ],
 };

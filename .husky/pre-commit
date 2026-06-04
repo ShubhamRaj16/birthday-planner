@@ -3,26 +3,22 @@ set -e
 
 STAGED=$(git diff --cached --name-only)
 
-# Lint backend if any backend/src JS files staged
-if echo "$STAGED" | grep -q "^backend/src/.*\.js$"; then
-  echo "[pre-commit] Linting backend..."
-  cd backend
-  ESLINT_USE_FLAT_CONFIG=false ./node_modules/.bin/eslint 'src/**/*.{ts,js}'
-  cd ..
+# Lint core if any core/src source files staged
+if echo "$STAGED" | grep -qE "^packages/core/src/.*\.(ts|js)$"; then
+  echo "[pre-commit] Linting core..."
+  npm run lint -w @birthday-planner/core
 fi
 
-# Lint frontend if any frontend/src JS/JSX files staged
-if echo "$STAGED" | grep -qE "^frontend/src/.*\.(js|jsx)$"; then
-  echo "[pre-commit] Linting frontend..."
-  cd frontend
-  ESLINT_USE_FLAT_CONFIG=false ./node_modules/.bin/eslint 'src/**/*.{ts,tsx,js,jsx}'
-  cd ..
+# Lint ui if any ui/src source files staged
+if echo "$STAGED" | grep -qE "^packages/ui/src/.*\.(ts|tsx|js|jsx)$"; then
+  echo "[pre-commit] Linting ui..."
+  npm run lint -w @birthday-planner/ui
 fi
 
 # Validate schema if schema.prisma staged
-if echo "$STAGED" | grep -q "backend/prisma/schema.prisma"; then
+if echo "$STAGED" | grep -q "packages/core/prisma/schema.prisma"; then
   echo "[pre-commit] Validating Prisma schema..."
-  cd backend && ./node_modules/.bin/prisma validate && cd ..
+  npm exec -w @birthday-planner/core -- prisma validate
 fi
 
 echo "[pre-commit] All checks passed."

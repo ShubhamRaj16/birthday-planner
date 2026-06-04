@@ -3,13 +3,15 @@ module.exports = {
     node: true,
     es2022: true,
   },
+  parser: '@typescript-eslint/parser',
+  plugins: ['@typescript-eslint'],
   extends: [
     'eslint:recommended',
     'prettier',
   ],
   parserOptions: {
     ecmaVersion: 'latest',
-    sourceType: 'commonjs',
+    sourceType: 'module',
   },
   rules: {
     // Catch unused imports/vars — Phase 4 shipped with 2 unused imports
@@ -41,6 +43,18 @@ module.exports = {
   ignorePatterns: ['node_modules/', 'prisma/migrations/'],
   overrides: [
     {
+      // TypeScript-specific overrides for all .ts files
+      files: ['**/*.ts'],
+      rules: {
+        // Replace base rule with TS-aware version that handles `this` type params
+        'no-unused-vars': 'off',
+        '@typescript-eslint/no-unused-vars': ['error', { argsIgnorePattern: '^_', varsIgnorePattern: '^_', caughtErrorsIgnorePattern: '^_' }],
+        // TypeScript handles undefined-variable checking via tsc; no-undef can't
+        // resolve global augmentations like Express.Multer.File from @types/*
+        'no-undef': 'off',
+      },
+    },
+    {
       files: ['src/test/**/*.{js,ts}', 'src/test/**/*.mjs', 'tests/**/*.{js,ts}'],
       globals: {
         vi: 'readonly',
@@ -48,10 +62,10 @@ module.exports = {
         it: 'readonly',
         test: 'readonly',
         expect: 'readonly',
-        beforeAll: 'readonly',
         beforeEach: 'readonly',
-        afterAll: 'readonly',
         afterEach: 'readonly',
+        beforeAll: 'readonly',
+        afterAll: 'readonly',
       },
     },
   ],

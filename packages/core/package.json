@@ -1,6 +1,7 @@
 {
-  "name": "birthday-planner-backend",
+  "name": "@birthday-planner/core",
   "version": "1.0.0",
+  "private": true,
   "main": "dist/server.js",
   "scripts": {
     "dev": "tsx watch server.ts",

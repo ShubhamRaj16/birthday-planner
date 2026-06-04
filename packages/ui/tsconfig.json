@@ -15,12 +15,11 @@
     "noEmit": true,
     "types": ["node"]
   },
-  "//": "Phased migration: strict typecheck covers the data layer (types, lib, redux). SSR server (src/server) and UI (.jsx) compile via webpack/Babel and migrate to strict TS in a later phase.",
+  "//": "Phased migration: strict typecheck covers the data layer (types, lib, redux, services, routes). Components/pages (.tsx) compile via webpack/Babel and migrate to strict TS in a later phase.",
   "include": [
     "src/types.ts",
     "src/lib/**/*.ts",
     "src/redux/**/*.ts",
-    "src/server/**/*.ts",
     "src/services/**/*.ts",
     "src/routes/**/*.ts"
   ],

@@ -6,36 +6,39 @@ on:
     branches: [master]
 
 jobs:
-  frontend:
+  core:
     runs-on: ubuntu-latest
-    defaults:
-      run:
-        working-directory: frontend
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-node@v4
         with:
           node-version: '20'
           cache: npm
-          cache-dependency-path: frontend/package-lock.json
       - run: npm ci
-      - run: npm run typecheck
-      - run: npm run lint
-      - run: npm run test:coverage
+      - run: npm exec -w @birthday-planner/core -- prisma generate
+      - run: npm run typecheck -w @birthday-planner/core
+      - run: npm test -w @birthday-planner/core
 
-  backend:
+  ui:
     runs-on: ubuntu-latest
-    defaults:
-      run:
-        working-directory: backend
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-node@v4
         with:
           node-version: '20'
           cache: npm
-          cache-dependency-path: backend/package-lock.json
       - run: npm ci
-      - run: npx prisma generate
-      - run: npm run typecheck
-      - run: npm test
+      - run: npm run typecheck -w @birthday-planner/ui
+      - run: npm run lint -w @birthday-planner/ui
+      - run: npm run test:coverage -w @birthday-planner/ui
+
+  web:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: npm
+      - run: npm ci
+      - run: npm run build -w @birthday-planner/web

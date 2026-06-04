@@ -1,7 +1,7 @@
 import { buildWaLink } from '../lib/waLink';
 import prisma from '../lib/prisma';
 import dayjs from 'dayjs';
-import type { Child, Event, Guest } from '@prisma/client';
+import type { Child, Event } from '@prisma/client';
 import type { MessageContext, WaLinkResult } from '../types';
 
 const DEFAULT_TEMPLATE = `Hi {guestName}! 🎉
