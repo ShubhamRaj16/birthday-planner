@@ -8,13 +8,12 @@ function escapeCell(value: unknown): string {
 }
 
 /** Build a CSV string from a header row + array of row objects (column order = headers). */
-export function toCsv<T>(
-  headers: { key: keyof T; label: string }[],
-  rows: T[],
-): string {
+export function toCsv<T>(headers: { key: keyof T; label: string }[], rows: T[]): string {
   const head = headers.map((h) => escapeCell(h.label)).join(',');
   const body = rows
-    .map((row) => headers.map((h) => escapeCell((row as Record<keyof T, unknown>)[h.key])).join(','))
+    .map((row) =>
+      headers.map((h) => escapeCell((row as Record<keyof T, unknown>)[h.key])).join(',')
+    )
     .join('\n');
   return `${head}\n${body}`;
 }
@@ -35,5 +34,8 @@ export function downloadCsv(filename: string, content: string): void {
 
 /** Slugify a string for use in a filename (e.g. event theme). */
 export function fileSlug(s: string | null | undefined): string {
-  return (s || 'export').toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-|-$/g, '');
+  return (s || 'export')
+    .toLowerCase()
+    .replace(/[^a-z0-9]+/g, '-')
+    .replace(/^-|-$/g, '');
 }

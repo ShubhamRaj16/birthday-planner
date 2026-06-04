@@ -8,7 +8,10 @@ vi.mock('../../lib/apiClient', () => ({
 import { configureStore } from '@reduxjs/toolkit';
 import apiClient from '../../lib/apiClient';
 import reducer, {
-  fetchChildren, createChild, updateChild, deleteChild,
+  fetchChildren,
+  createChild,
+  updateChild,
+  deleteChild,
 } from '../../redux/slices/childrenSlice';
 import { ok } from '../../test/mockHttp';
 import { aChild } from '../../test/fixtures';
@@ -65,7 +68,8 @@ describe('childrenSlice rejected paths', () => {
   it('sets error on create/update/delete rejection', async () => {
     const store = makeStore();
     mockApi.post.mockRejectedValue(new Error('x'));
-    const fd = new FormData(); fd.append('name', 'M');
+    const fd = new FormData();
+    fd.append('name', 'M');
     await store.dispatch(createChild(fd));
     mockApi.put.mockRejectedValue(new Error('x'));
     await store.dispatch(updateChild({ id: 1, data: { name: 'N' } }));

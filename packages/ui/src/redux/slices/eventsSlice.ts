@@ -6,17 +6,14 @@ import type { ApiResponse, Event, EventsState } from '../../types';
 type EventInput = Partial<Event>;
 type UpdateEventArgs = { id: number; data: EventInput };
 
-export const fetchEvents = createAsyncThunk(
-  'events/fetchAll',
-  async (_, { rejectWithValue }) => {
-    try {
-      const response = await apiClient.get<ApiResponse<Event[]>>('/events');
-      return response.data.data;
-    } catch (error) {
-      return rejectWithValue(getApiError(error));
-    }
+export const fetchEvents = createAsyncThunk('events/fetchAll', async (_, { rejectWithValue }) => {
+  try {
+    const response = await apiClient.get<ApiResponse<Event[]>>('/events');
+    return response.data.data;
+  } catch (error) {
+    return rejectWithValue(getApiError(error));
   }
-);
+});
 
 export const fetchEvent = createAsyncThunk(
   'events/fetchOne',

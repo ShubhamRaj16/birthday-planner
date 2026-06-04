@@ -8,7 +8,11 @@ vi.mock('../../lib/apiClient', () => ({
 import { configureStore } from '@reduxjs/toolkit';
 import apiClient from '../../lib/apiClient';
 import reducer, {
-  fetchReminders, fetchUnreadCount, createReminder, deleteReminder, markRead,
+  fetchReminders,
+  fetchUnreadCount,
+  createReminder,
+  deleteReminder,
+  markRead,
 } from '../../redux/slices/remindersSlice';
 import { ok } from '../../test/mockHttp';
 import { aReminder } from '../../test/fixtures';
@@ -56,7 +60,9 @@ describe('remindersSlice', () => {
   });
 
   it('markRead flags items fired and decrements unreadCount', async () => {
-    mockApi.get.mockResolvedValue(ok([aReminder({ id: 1, fired: false }), aReminder({ id: 2, fired: false })]));
+    mockApi.get.mockResolvedValue(
+      ok([aReminder({ id: 1, fired: false }), aReminder({ id: 2, fired: false })])
+    );
     const store = makeStore();
     await store.dispatch(fetchReminders());
     mockApi.get.mockResolvedValue(ok(2));

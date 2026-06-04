@@ -39,9 +39,7 @@ export default function NotFound() {
   return (
     <Container>
       <Title>404 — Page Not Found</Title>
-      <Description>
-        The page you are looking for does not exist.
-      </Description>
+      <Description>The page you are looking for does not exist.</Description>
       <HomeLink to="/">Go to Dashboard</HomeLink>
     </Container>
   );

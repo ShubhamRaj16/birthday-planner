@@ -8,7 +8,11 @@ vi.mock('../../lib/apiClient', () => ({
 import { configureStore } from '@reduxjs/toolkit';
 import apiClient from '../../lib/apiClient';
 import reducer, {
-  fetchGuests, createGuest, updateGuest, deleteGuest, bulkImportGuests,
+  fetchGuests,
+  createGuest,
+  updateGuest,
+  deleteGuest,
+  bulkImportGuests,
 } from '../../redux/slices/guestsSlice';
 import { ok } from '../../test/mockHttp';
 import { aGuest } from '../../test/fixtures';
@@ -55,7 +59,9 @@ describe('guestsSlice', () => {
     mockApi.post.mockResolvedValue(ok({ count: 2 }));
     const store = makeStore();
     await store.dispatch(bulkImportGuests({ eventId: 42, guests: [{ name: 'A' }, { name: 'B' }] }));
-    expect(mockApi.post).toHaveBeenCalledWith('/events/42/guests/bulk-import', { guests: [{ name: 'A' }, { name: 'B' }] });
+    expect(mockApi.post).toHaveBeenCalledWith('/events/42/guests/bulk-import', {
+      guests: [{ name: 'A' }, { name: 'B' }],
+    });
   });
 });
 

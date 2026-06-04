@@ -8,7 +8,10 @@ vi.mock('../../lib/apiClient', () => ({
 import { configureStore } from '@reduxjs/toolkit';
 import apiClient from '../../lib/apiClient';
 import reducer, {
-  fetchExpenses, createExpense, updateExpense, deleteExpense,
+  fetchExpenses,
+  createExpense,
+  updateExpense,
+  deleteExpense,
 } from '../../redux/slices/expensesSlice';
 import { ok } from '../../test/mockHttp';
 import { anExpense } from '../../test/fixtures';
@@ -31,7 +34,9 @@ describe('expensesSlice', () => {
   it('createExpense unshifts into the bucket', async () => {
     mockApi.post.mockResolvedValue(ok(anExpense({ id: 9 })));
     const store = makeStore();
-    await store.dispatch(createExpense({ eventId: 42, data: { label: 'Cake', amount: 1500, category: 'cake' } }));
+    await store.dispatch(
+      createExpense({ eventId: 42, data: { label: 'Cake', amount: 1500, category: 'cake' } })
+    );
     expect(store.getState().expenses.byEventId[42][0].id).toBe(9);
   });
 
@@ -64,7 +69,9 @@ describe('expensesSlice rejected paths', () => {
     mockApi.get.mockRejectedValue(new Error('x'));
     await store.dispatch(fetchExpenses(42));
     mockApi.post.mockRejectedValue(new Error('x'));
-    await store.dispatch(createExpense({ eventId: 42, data: { label: 'C', amount: 1, category: 'cake' } }));
+    await store.dispatch(
+      createExpense({ eventId: 42, data: { label: 'C', amount: 1, category: 'cake' } })
+    );
     mockApi.put.mockRejectedValue(new Error('x'));
     await store.dispatch(updateExpense({ eventId: 42, id: 1, data: {} }));
     mockApi.delete.mockRejectedValue(new Error('x'));

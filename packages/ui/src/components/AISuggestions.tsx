@@ -33,7 +33,9 @@ const TypeBtn = styled.button<{ $active: boolean }>`
   background: ${({ $active }) => ($active ? '#f3f0ff' : '#fff')};
   color: ${({ $active }) => ($active ? '#7c3aed' : '#374151')};
   transition: all 0.15s;
-  &:hover { border-color: #7c3aed; }
+  &:hover {
+    border-color: #7c3aed;
+  }
 `;
 
 const GenerateBtn = styled.button`
@@ -46,8 +48,13 @@ const GenerateBtn = styled.button`
   font-weight: 600;
   cursor: pointer;
   margin-bottom: 1.25rem;
-  &:hover { background: #6d28d9; }
-  &:disabled { background: #c4b5fd; cursor: not-allowed; }
+  &:hover {
+    background: #6d28d9;
+  }
+  &:disabled {
+    background: #c4b5fd;
+    cursor: not-allowed;
+  }
 `;
 
 const SuggestionList = styled.ul`
@@ -66,7 +73,9 @@ const SuggestionItem = styled.li`
   font-size: 0.9rem;
   color: #1f2937;
 
-  &:last-child { border-bottom: none; }
+  &:last-child {
+    border-bottom: none;
+  }
 `;
 
 const SuggestionText = styled.span`
@@ -85,8 +94,13 @@ const SaveBtn = styled.button`
   cursor: pointer;
   font-weight: 600;
   white-space: nowrap;
-  &:hover { background: #f3f4f6; }
-  &:disabled { opacity: 0.5; cursor: not-allowed; }
+  &:hover {
+    background: #f3f4f6;
+  }
+  &:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+  }
 `;
 
 const MessageBox = styled.pre`
@@ -110,7 +124,9 @@ const UseTemplateBtn = styled.button`
   font-size: 0.875rem;
   font-weight: 600;
   cursor: pointer;
-  &:hover { background: #6d28d9; }
+  &:hover {
+    background: #6d28d9;
+  }
 `;
 
 const ErrMsg = styled.p`
@@ -124,12 +140,12 @@ const EmptyMsg = styled.p`
 `;
 
 const TYPES = [
-  { id: 'themes',     label: 'Theme Ideas'   },
-  { id: 'activities', label: 'Activities'    },
-  { id: 'gifts',      label: 'Gift Ideas'    },
-  { id: 'venue',      label: 'Venue Ideas'   },
-  { id: 'catering',   label: 'Food & Catering' },
-  { id: 'message',    label: 'Invite Message' },
+  { id: 'themes', label: 'Theme Ideas' },
+  { id: 'activities', label: 'Activities' },
+  { id: 'gifts', label: 'Gift Ideas' },
+  { id: 'venue', label: 'Venue Ideas' },
+  { id: 'catering', label: 'Food & Catering' },
+  { id: 'message', label: 'Invite Message' },
 ];
 
 // ─── Component ────────────────────────────────────────────────────────────────
@@ -160,7 +176,11 @@ export default function AISuggestions({ eventId, onUseTemplate }: AISuggestionsP
     try {
       await saveGiftSuggestion(eventId, suggestion);
     } catch {
-      setSavedGifts((prev) => { const n = { ...prev }; delete n[suggestion]; return n; });
+      setSavedGifts((prev) => {
+        const n = { ...prev };
+        delete n[suggestion];
+        return n;
+      });
     }
   }
 
@@ -171,7 +191,11 @@ export default function AISuggestions({ eventId, onUseTemplate }: AISuggestionsP
           <TypeBtn
             key={t.id}
             $active={activeType === t.id}
-            onClick={() => { setActiveType(t.id); setSuggestions([]); setErr(null); }}
+            onClick={() => {
+              setActiveType(t.id);
+              setSuggestions([]);
+              setErr(null);
+            }}
           >
             {t.label}
           </TypeBtn>
@@ -205,10 +229,7 @@ export default function AISuggestions({ eventId, onUseTemplate }: AISuggestionsP
             <SuggestionItem key={i}>
               <SuggestionText>{s}</SuggestionText>
               {activeType === 'gifts' && (
-                <SaveBtn
-                  disabled={!!savedGifts[s]}
-                  onClick={() => handleSaveGift(s)}
-                >
+                <SaveBtn disabled={!!savedGifts[s]} onClick={() => handleSaveGift(s)}>
                   {savedGifts[s] ? 'Saved' : 'Save to Gifts'}
                 </SaveBtn>
               )}

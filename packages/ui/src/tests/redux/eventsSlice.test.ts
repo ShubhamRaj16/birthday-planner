@@ -8,7 +8,13 @@ vi.mock('../../lib/apiClient', () => ({
 import { configureStore } from '@reduxjs/toolkit';
 import apiClient from '../../lib/apiClient';
 import reducer, {
-  fetchEvents, fetchEvent, fetchUpcoming, createEvent, updateEvent, deleteEvent, activateEvent,
+  fetchEvents,
+  fetchEvent,
+  fetchUpcoming,
+  createEvent,
+  updateEvent,
+  deleteEvent,
+  activateEvent,
 } from '../../redux/slices/eventsSlice';
 import { ok } from '../../test/mockHttp';
 import { anEvent } from '../../test/fixtures';

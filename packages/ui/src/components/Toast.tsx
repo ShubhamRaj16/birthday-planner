@@ -1,7 +1,11 @@
 import { useEffect } from 'react';
 import { useSelector, useDispatch } from 'react-redux';
 import styled from 'styled-components';
-import { removeToast, type Toast as ToastItem, type ToastVariant } from '../redux/slices/toastSlice';
+import {
+  removeToast,
+  type Toast as ToastItem,
+  type ToastVariant,
+} from '../redux/slices/toastSlice';
 import type { RootState } from '../types';
 
 const Stack = styled.div`
@@ -34,7 +38,12 @@ function ToastRow({ toast }: { toast: ToastItem }) {
     return () => clearTimeout(t);
   }, [dispatch, toast.id]);
   return (
-    <Item $variant={toast.variant} role="status" aria-live="polite" onClick={() => dispatch(removeToast(toast.id))}>
+    <Item
+      $variant={toast.variant}
+      role="status"
+      aria-live="polite"
+      onClick={() => dispatch(removeToast(toast.id))}
+    >
       {toast.message}
     </Item>
   );

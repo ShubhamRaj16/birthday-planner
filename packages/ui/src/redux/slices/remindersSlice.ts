@@ -21,7 +21,8 @@ export const fetchUnreadCount = createAsyncThunk(
   'reminders/fetchUnreadCount',
   async (_, { rejectWithValue }) => {
     try {
-      const response = await apiClient.get<ApiResponse<number | { count: number }>>('/reminders/unread-count');
+      const response =
+        await apiClient.get<ApiResponse<number | { count: number }>>('/reminders/unread-count');
       return response.data.data;
     } catch (error) {
       return rejectWithValue(getApiError(error));
@@ -94,9 +95,7 @@ const remindersSlice = createSlice({
       // fetchUnreadCount
       .addCase(fetchUnreadCount.fulfilled, (state, action) => {
         state.unreadCount =
-          typeof action.payload === 'number'
-            ? action.payload
-            : action.payload?.count ?? 0;
+          typeof action.payload === 'number' ? action.payload : (action.payload?.count ?? 0);
       })
       // createReminder
       .addCase(createReminder.pending, (state) => {
@@ -121,9 +120,7 @@ const remindersSlice = createSlice({
       // markRead — update fired status for affected IDs, decrement unreadCount
       .addCase(markRead.fulfilled, (state, action) => {
         const ids = new Set(action.payload);
-        state.items = state.items.map((r) =>
-          ids.has(r.id) ? { ...r, fired: true } : r
-        );
+        state.items = state.items.map((r) => (ids.has(r.id) ? { ...r, fired: true } : r));
         state.unreadCount = Math.max(0, state.unreadCount - ids.size);
       })
       .addCase(markRead.rejected, (state, action) => {

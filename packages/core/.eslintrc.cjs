@@ -39,6 +39,8 @@ module.exports = {
 
     // Shadowing local vars is a common source of silent bugs
     'no-shadow': ['warn', { allow: ['err', 'error', 'resolve', 'reject'] }],
+
+    'max-lines': ['error', { max: 250, skipBlankLines: false, skipComments: false }],
   },
   ignorePatterns: ['node_modules/', 'prisma/migrations/'],
   overrides: [

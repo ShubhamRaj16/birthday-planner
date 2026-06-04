@@ -49,6 +49,8 @@ module.exports = {
 
     // Warn on console in frontend — should use error state, not console.error
     'no-console': ['warn', { allow: ['error', 'warn', 'info'] }],
+
+    'max-lines': ['error', { max: 250, skipBlankLines: false, skipComments: false }],
   },
   ignorePatterns: ['node_modules/', 'dist/'],
 };

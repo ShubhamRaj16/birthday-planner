@@ -1,7 +1,10 @@
 import { describe, it, expect, vi } from 'vitest';
 import { toCsv, fileSlug, downloadCsv } from '../../lib/csv';
 
-interface Row { name: string; note: string; }
+interface Row {
+  name: string;
+  note: string;
+}
 
 describe('toCsv', () => {
   it('builds header + body rows in column order', () => {

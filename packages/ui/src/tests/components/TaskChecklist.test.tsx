@@ -29,7 +29,7 @@ describe('TaskChecklist', () => {
     });
 
     it('shows 100% when all done', () => {
-      const allDone = makeTasks().map(t => ({ ...t, done: true }));
+      const allDone = makeTasks().map((t) => ({ ...t, done: true }));
       render(<TaskChecklist eventId={1} tasks={allDone} onRefresh={() => {}} />);
       expect(screen.getByText(/100%/)).toBeInTheDocument();
     });

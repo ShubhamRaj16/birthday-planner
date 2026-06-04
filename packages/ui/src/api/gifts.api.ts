@@ -8,7 +8,7 @@ import type { ApiResponse, Gift } from '../types';
 /** Create a gift for an event (e.g. saving an AI suggestion). */
 export async function createGift(
   eventId: number,
-  data: { name: string; source?: string },
+  data: { name: string; source?: string }
 ): Promise<Gift> {
   const res = await http.post<ApiResponse<Gift>>(`/events/${eventId}/gifts`, data);
   return res.data.data;

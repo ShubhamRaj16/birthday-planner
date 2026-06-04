@@ -8,7 +8,7 @@ describe('mediaUrl', () => {
 
   it('passes the storage path through unchanged', () => {
     expect(mediaUrl('/uploads/photos/10/a b.png')).toBe(
-      'http://localhost:3001/uploads/photos/10/a b.png',
+      'http://localhost:3001/uploads/photos/10/a b.png'
     );
   });
 });

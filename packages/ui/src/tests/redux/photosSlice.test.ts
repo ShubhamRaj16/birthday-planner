@@ -8,7 +8,10 @@ vi.mock('../../lib/apiClient', () => ({
 import { configureStore } from '@reduxjs/toolkit';
 import apiClient from '../../lib/apiClient';
 import reducer, {
-  fetchPhotos, uploadPhoto, updatePhoto, deletePhoto,
+  fetchPhotos,
+  uploadPhoto,
+  updatePhoto,
+  deletePhoto,
 } from '../../redux/slices/photosSlice';
 import { ok } from '../../test/mockHttp';
 import { aPhoto } from '../../test/fixtures';
@@ -35,7 +38,9 @@ describe('photosSlice', () => {
   });
 
   it('updatePhoto setting cover clears other covers', async () => {
-    mockApi.get.mockResolvedValue(ok([aPhoto({ id: 1, isCover: true }), aPhoto({ id: 2, isCover: false })]));
+    mockApi.get.mockResolvedValue(
+      ok([aPhoto({ id: 1, isCover: true }), aPhoto({ id: 2, isCover: false })])
+    );
     const store = makeStore();
     await store.dispatch(fetchPhotos(42));
     mockApi.put.mockResolvedValue(ok(aPhoto({ id: 2, isCover: true })));
@@ -66,7 +71,8 @@ describe('photosSlice rejected paths', () => {
   it('sets error on upload/update/delete rejection', async () => {
     const store = makeStore();
     mockApi.post.mockRejectedValue(new Error('x'));
-    const fd = new FormData(); fd.append('photo', new File(['x'], 'p.png', { type: 'image/png' }));
+    const fd = new FormData();
+    fd.append('photo', new File(['x'], 'p.png', { type: 'image/png' }));
     await store.dispatch(uploadPhoto({ eventId: 42, formData: fd }));
     mockApi.put.mockRejectedValue(new Error('x'));
     await store.dispatch(updatePhoto({ eventId: 42, photoId: 1, data: {} }));

@@ -36,7 +36,9 @@ const NavLink = styled(Link)<{ $active: boolean }>`
   font-size: 0.9rem;
   font-weight: ${({ $active }) => ($active ? '600' : '400')};
   background: ${({ $active }) => ($active ? 'rgba(255,255,255,0.15)' : 'transparent')};
-  transition: background 0.15s, color 0.15s;
+  transition:
+    background 0.15s,
+    color 0.15s;
   position: relative;
   display: flex;
   align-items: center;

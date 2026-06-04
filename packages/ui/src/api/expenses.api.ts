@@ -9,14 +9,14 @@ import type { ApiResponse, Expense } from '../types';
 export async function uploadReceipt(
   eventId: number,
   expenseId: number,
-  file: File,
+  file: File
 ): Promise<Expense> {
   const fd = new FormData();
   fd.append('receipt', file);
   const res = await http.post<ApiResponse<Expense>>(
     `/events/${eventId}/expenses/${expenseId}/receipt`,
     fd,
-    { headers: { 'Content-Type': 'multipart/form-data' } },
+    { headers: { 'Content-Type': 'multipart/form-data' } }
   );
   return res.data.data;
 }

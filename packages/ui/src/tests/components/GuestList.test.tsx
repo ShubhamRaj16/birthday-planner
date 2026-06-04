@@ -13,9 +13,33 @@ const makeState = (guests: Partial<Guest>[]): Partial<RootState> => ({
 });
 
 const mockGuests: Partial<Guest>[] = [
-  { id: 1, name: 'Alice', rsvp: 'Confirmed', inviteSent: false, phone: '9876543210', ageGroup: 'adult', dietary: '' },
-  { id: 2, name: 'Bob',   rsvp: 'Pending',   inviteSent: true,  phone: '9876543211', ageGroup: 'adult', dietary: '' },
-  { id: 3, name: 'Carol', rsvp: 'Declined',  inviteSent: false, phone: '9876543212', ageGroup: 'child', dietary: '' },
+  {
+    id: 1,
+    name: 'Alice',
+    rsvp: 'Confirmed',
+    inviteSent: false,
+    phone: '9876543210',
+    ageGroup: 'adult',
+    dietary: '',
+  },
+  {
+    id: 2,
+    name: 'Bob',
+    rsvp: 'Pending',
+    inviteSent: true,
+    phone: '9876543211',
+    ageGroup: 'adult',
+    dietary: '',
+  },
+  {
+    id: 3,
+    name: 'Carol',
+    rsvp: 'Declined',
+    inviteSent: false,
+    phone: '9876543212',
+    ageGroup: 'child',
+    dietary: '',
+  },
 ];
 
 describe('GuestList', () => {

@@ -29,7 +29,10 @@ describe('tasksApi', () => {
     mockHttp.post.mockResolvedValue(ok({ id: 2, title: 'Cake' }));
     const result = await tasksApi.createTask(10, { title: 'Cake', category: 'cake' });
     expect(result).toEqual({ id: 2, title: 'Cake' });
-    expect(mockHttp.post).toHaveBeenCalledWith('/events/10/tasks', { title: 'Cake', category: 'cake' });
+    expect(mockHttp.post).toHaveBeenCalledWith('/events/10/tasks', {
+      title: 'Cake',
+      category: 'cake',
+    });
   });
 
   it('resetDefaults posts to reset-defaults', async () => {

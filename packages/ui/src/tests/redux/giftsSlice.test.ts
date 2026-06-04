@@ -8,7 +8,10 @@ vi.mock('../../lib/apiClient', () => ({
 import { configureStore } from '@reduxjs/toolkit';
 import apiClient from '../../lib/apiClient';
 import reducer, {
-  fetchGifts, createGift, updateGift, deleteGift,
+  fetchGifts,
+  createGift,
+  updateGift,
+  deleteGift,
 } from '../../redux/slices/giftsSlice';
 import { ok } from '../../test/mockHttp';
 import { aGift } from '../../test/fixtures';

@@ -17,7 +17,7 @@ export async function deleteTask(eventId: number, taskId: number): Promise<void>
 /** Add a task to an event's checklist. */
 export async function createTask(
   eventId: number,
-  data: { title: string; category: string; dueDate?: string },
+  data: { title: string; category: string; dueDate?: string }
 ): Promise<Task> {
   const res = await http.post<ApiResponse<Task>>(`/events/${eventId}/tasks`, data);
   return res.data.data;
