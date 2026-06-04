@@ -1,30 +1,31 @@
 # Birthday Planner
 
 A local-first web app to plan and manage kids' birthday parties — guests, tasks,
-budget, gifts, WhatsApp invites with MyGate codes, AI suggestions, and photo memories.
+budget, gifts, WhatsApp invites with MyGate codes, and photo memories.
 Runs entirely on your machine; a co-host can use it over the home WiFi.
 
 ## Quick start
 
 ```bash
-npm run install:all          # install root + backend + frontend deps
-cp .env.example .env          # add your ANTHROPIC_API_KEY
-cd backend && npx prisma migrate dev --name init && cd ..
-npm run dev                   # backend :3001 + frontend :5173
+npm install
+cp packages/core/.env.example packages/core/.env   # add your config
+npm exec -w @birthday-planner/core -- prisma migrate dev --name init
+npm run dev   # API :3001 + web dev-server :3000
 ```
 
-- App (you):      http://localhost:5173
-- Co-host (WiFi):  http://<your-ip>:5173   (find IP via `ipconfig` / `ifconfig`)
+- App (you):      http://localhost:3000
+- Co-host (WiFi): http://<your-ip>:3000   (find IP via `ipconfig` / `ifconfig`)
 
 ## Layout
 
-- `backend/`  Node.js + Express + Prisma (SQLite, WAL mode)
-- `frontend/` React + Vite + Tailwind
+- `packages/core/`  Node.js + Express + Prisma (SQLite, WAL mode) — API server
+- `packages/ui/`    React + Webpack + styled-components — shared UI library
+- `apps/web/`       Thin SPA shell — mounts `@birthday-planner/ui` in the browser
 
-See the design docs in Confluence and `CLAUDE.md` for full context.
+See `CLAUDE.md` for full architecture context.
 
 ## Backup
 
 ```bash
-npm run backup   # zips backend/prisma/birthday.db + backend/uploads/
+npm run backup   # zips packages/core/prisma/birthday.db + packages/core/uploads/
 ```
