@@ -13,3 +13,7 @@ dist/
 
 # Claude skills bundle (large, local-only — re-run setup-claude.sh bundle step)
 skills-bundle/
+setup-claude.sh
+
+# graphify output — fully auto-generated, re-run `graphify update .` to rebuild
+graphify-out/
