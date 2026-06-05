@@ -1,0 +1,44 @@
+{
+  "name": "@birthday-planner/web",
+  "version": "1.0.0",
+  "private": true,
+  "description": "Birthday Planner web shell — bundles and serves @birthday-planner/ui as an SPA",
+  "main": "scripts/serve.cjs",
+  "scripts": {
+    "dev": "cross-env NODE_ENV=development node scripts/dev.cjs",
+    "build": "npm run build:client",
+    "build:client": "webpack --config config/webpack.client.cjs --mode production",
+    "start": "cross-env NODE_ENV=production node scripts/serve.cjs",
+    "clean": "rm -rf dist",
+    "typecheck": "tsc --noEmit"
+  },
+  "author": "",
+  "license": "ISC",
+  "dependencies": {
+    "@birthday-planner/ui": "*",
+    "express": "^4.18.2",
+    "react": "^18.2.0",
+    "react-dom": "^18.2.0",
+    "react-redux": "^8.1.1",
+    "react-router-dom": "^6.14.0"
+  },
+  "devDependencies": {
+    "@babel/core": "^7.22.0",
+    "@babel/preset-env": "^7.22.0",
+    "@babel/preset-react": "^7.22.0",
+    "@babel/preset-typescript": "^7.29.7",
+    "@types/express": "^4.17.17",
+    "@types/react": "^18.2.0",
+    "@types/react-dom": "^18.2.0",
+    "babel-loader": "^9.1.2",
+    "babel-plugin-styled-components": "^2.1.4",
+    "cross-env": "^7.0.3",
+    "css-loader": "^6.11.0",
+    "html-webpack-plugin": "^5.6.7",
+    "style-loader": "^3.3.4",
+    "typescript": "^5.6.3",
+    "webpack": "^5.88.0",
+    "webpack-cli": "^5.1.4",
+    "webpack-dev-server": "^4.15.2"
+  }
+}

@@ -1,13 +1,19 @@
 node_modules/
 .env
-backend/prisma/birthday.db
-backend/prisma/test.db
-backend/prisma/*.db-journal
-backend/prisma/*.db-wal
-backend/prisma/*.db-shm
-backend/uploads/**
-!backend/uploads/**/.gitkeep
-backend/backup/
+packages/core/prisma/**/*.db
+packages/core/prisma/**/*.db-journal
+packages/core/prisma/**/*.db-wal
+packages/core/prisma/**/*.db-shm
+packages/core/uploads/**
+!packages/core/uploads/**/.gitkeep
+packages/core/backup/
 backup/
 dist/
 .DS_Store
+
+# Claude skills bundle (large, local-only — re-run setup-claude.sh bundle step)
+skills-bundle/
+setup-claude.sh
+
+# graphify output — fully auto-generated, re-run `graphify update .` to rebuild
+graphify-out/
